@@ -13,6 +13,10 @@ from pathlib import Path
 # Ensure the app module is importable
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+# Load .env file so ADMIN_PASSWORD_1/2 are available
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
 os.environ.setdefault("ENVIRONMENT", "development")
 
 import bcrypt
