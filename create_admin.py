@@ -13,32 +13,42 @@ from pathlib import Path
 # Ensure the app module is importable
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-# Load .env file so ADMIN_PASSWORD_1/2 are available
-from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parent / ".env")
-
 os.environ.setdefault("ENVIRONMENT", "development")
 
 import bcrypt
 from sqlalchemy import create_engine, text, func
 from sqlalchemy.orm import Session
 
+# Read .env manually (reliable, no dependency on python-dotenv)
+_env_path = Path(__file__).resolve().parent / ".env"
+_env_vars = {}
+if _env_path.exists():
+    for line in _env_path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, _, v = line.partition("=")
+            _env_vars[k.strip()] = v.strip()
+
+def _env(key: str, default: str = "") -> str:
+    return os.environ.get(key) or _env_vars.get(key, default)
+
 ADMINS = [
     {
-        "email": os.environ.get("ADMIN_EMAIL_1", "Rohit@Quovex.online"),
-        "password": os.environ.get("ADMIN_PASSWORD_1", "somehowimetyou"),
+        "email": _env("ADMIN_EMAIL_1", "Rohit@Quovex.online"),
+        "password": _env("ADMIN_PASSWORD_1", "somehowimetyou"),
         "role": "superadmin",
     },
     {
-        "email": os.environ.get("ADMIN_EMAIL_2", "Kartikey@Quovex.online"),
-        "password": os.environ.get("ADMIN_PASSWORD_2", "somehowyouleftme"),
+        "email": _env("ADMIN_EMAIL_2", "Kartikey@Quovex.online"),
+        "password": _env("ADMIN_PASSWORD_2", "somehowyouleftme"),
         "role": "superadmin",
     },
 ]
 
 _any_default = any(
     a["password"] in ("somehowimetyou", "somehowyouleftme")
-    and "ADMIN_PASSWORD" not in os.environ
+    and not _env_vars.get("ADMIN_PASSWORD_1")
+    and not _env_vars.get("ADMIN_PASSWORD_2")
     for a in ADMINS
 )
 if _any_default:
