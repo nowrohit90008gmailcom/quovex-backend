@@ -82,6 +82,8 @@ cd "$PROJECT_DIR/dashboard"
 npm ci
 log "Building dashboard..."
 NEXT_PUBLIC_API_URL="https://${DOMAIN_API}/api/v1" npm run build
+# Fix Next.js standalone: static files need to be accessible inside standalone/.next/
+ln -sfn "$PROJECT_DIR/dashboard/.next/static" "$PROJECT_DIR/dashboard/.next/standalone/.next/static" || true
 cd "$PROJECT_DIR"
 
 # ─── 6. Create .env ──────────────────────────────────────────────────────────
