@@ -1,0 +1,97 @@
+# Quovex VPS Commands Cheat Sheet
+
+This file contains the most important commands you'll need to manage, troubleshoot, and update your native VPS setup. All these commands should be run while connected to your VPS via SSH as the `root` user.
+
+## 1. Managing Services (Start, Stop, Restart)
+You have four custom services running your app: `quovex-backend`, `quovex-dashboard`, `quovex-celery-worker`, and `quovex-celery-beat`.
+
+**Check the status of a service:**
+```bash
+systemctl status quovex-backend
+```
+
+**Restart a service (useful after pulling new code):**
+```bash
+systemctl restart quovex-backend
+```
+
+**Restart all services at once:**
+```bash
+systemctl restart quovex-backend quovex-dashboard quovex-celery-worker quovex-celery-beat
+```
+
+## 2. Viewing Live Logs
+If something is crashing or you want to monitor traffic, `journalctl` is your best friend. The `-f` flag "follows" the log live. Press `Ctrl + C` to stop watching.
+
+**Backend API Logs:**
+```bash
+journalctl -u quovex-backend -f
+```
+
+**Dashboard Logs:**
+```bash
+journalctl -u quovex-dashboard -f
+```
+
+**Celery Background Tasks (Email/AI) Logs:**
+```bash
+journalctl -u quovex-celery-worker -f
+```
+
+**Web Server (Caddy) Logs (for SSL/Routing issues):**
+```bash
+journalctl -u caddy -f
+```
+
+## 3. Updating Code (Deploying Changes)
+When you push new code from your PC to GitHub, it doesn't automatically go to the VPS. Run these commands on the VPS to pull the changes and apply them:
+
+**Pull latest code from GitHub:**
+```bash
+cd /opt/quovex
+git pull
+```
+
+**If you changed Python dependencies (`requirements.txt`):**
+```bash
+cd /opt/quovex
+./venv/bin/pip install -r requirements.txt
+systemctl restart quovex-backend quovex-celery-worker
+```
+
+**If you changed Database Models (Alembic Migrations):**
+```bash
+cd /opt/quovex
+./venv/bin/alembic upgrade head
+```
+
+**If you changed the Next.js Dashboard code:**
+```bash
+cd /opt/quovex/dashboard
+npm ci
+NEXT_PUBLIC_API_URL="https://api.quovex.online/api/v1" npm run build
+systemctl restart quovex-dashboard
+```
+
+## 4. Database Access (PostgreSQL)
+To run raw SQL queries or inspect your database directly on the VPS:
+
+**Open the PostgreSQL Console:**
+```bash
+su - postgres
+psql -d quovex
+```
+*(Type `\q` and hit Enter to exit, then type `exit` to go back to root).*
+
+## 5. File Transfers (Run these on your local PC!)
+If you need to move a specific file to or from the VPS, use `scp` in your local PowerShell or Terminal.
+
+**Upload a file to the VPS:**
+```bash
+scp C:\path\to\your\file.json root@<YOUR_VPS_IP>:/opt/quovex/
+```
+
+**Download a file from the VPS:**
+```bash
+scp root@<YOUR_VPS_IP>:/opt/quovex/some_log.txt C:\path\to\save\
+```
