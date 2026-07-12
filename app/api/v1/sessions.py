@@ -1,0 +1,474 @@
+"""Sessions router - start/end study sessions, ad doubling, social unlock."""
+from datetime import datetime, timezone, timedelta
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session as DBSession
+
+from app.core.security import get_current_user
+from app.core.anti_cheat import compute_anti_cheat_score, should_flag
+from app.db.session import get_db
+from app.models import User, Session as StudySession, StudyMode
+from app.schemas import (
+    SessionStartIn, SessionStartOut,
+    SessionEndIn, SessionEndOut, BadgeOut,
+    SessionAdDoubleIn, SessionAdDoubleOut,
+    SessionPauseOut, SessionResumeOut, SessionHeartbeatOut,
+    SessionOut, SocialUnlockOut, SocialUnlockAdOut,
+)
+from app.services.points_service import (
+    calculate_points, apply_ad_double, get_daily_verified_minutes
+)
+from app.services.badge_service import check_and_award_badges
+
+router = APIRouter(prefix="/sessions", tags=["sessions"])
+
+SOCIAL_UNLOCK_PER_HOUR = 15          # minutes unlocked per verified study hour
+SOCIAL_UNLOCK_AD_BONUS = 5           # minutes from ad
+SOCIAL_UNLOCK_AD_COOLDOWN_HRS = 2    # hours between ads
+
+
+@router.post("/start", response_model=SessionStartOut)
+async def start_session(
+    body: SessionStartIn,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Start a new study session. Ends any existing active session first."""
+    # End any lingering active session
+    active = (
+        db.query(StudySession)
+        .filter(StudySession.user_id == current_user.id, StudySession.is_active == True)
+        .first()
+    )
+    if active:
+        active.is_active = False
+        active.end_time = datetime.now(timezone.utc)
+        db.commit()
+
+    # Re-enable app lock for the new session (if user has a daily target)
+    if current_user.daily_study_target_minutes and current_user.daily_study_target_minutes > 0:
+        current_user.app_lock_enabled = True
+
+    session = StudySession(
+        user_id=current_user.id,
+        mode=body.mode,
+        start_time=datetime.now(timezone.utc),
+        subject_tag=body.subject_tag,
+        exam_tag=body.exam_tag,
+        topic_id=body.topic_id,
+        locked_app_count=len(body.locked_apps or []),
+        whitelist_apps=body.whitelist_apps or [],
+        is_active=True,
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+
+    return SessionStartOut(
+        session_id=session.id,
+        started_at=session.start_time,
+        mode=session.mode,
+    )
+
+
+@router.post("/{session_id}/end", response_model=SessionEndOut)
+async def end_session_by_id(
+    session_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """End a session by its ID in the URL path (Flutter uses this pattern)."""
+    from app.schemas import SessionEndIn
+    body = SessionEndIn(session_id=session_id)
+    return await end_session(body, current_user, db)
+
+
+@router.post("/end", response_model=SessionEndOut)
+async def end_session(
+    body: SessionEndIn,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """End a study session: calculate verified minutes, points, streak, anti-cheat."""
+    session = (
+        db.query(StudySession)
+        .filter(
+            StudySession.id == body.session_id,
+            StudySession.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if not session.is_active:
+        raise HTTPException(status_code=400, detail="Session already ended")
+
+    now = datetime.now(timezone.utc)
+    session.end_time = now
+    session.is_active = False
+    if body.honor_check_failures is not None:
+        session.honor_check_failures = body.honor_check_failures
+
+    # Calculate raw minutes (exclude paused time)
+    elapsed_seconds = int((now - session.start_time).total_seconds()) - session.total_paused_seconds
+    raw_minutes = max(0, elapsed_seconds // 60)
+    session.raw_minutes = raw_minutes
+
+    # Verified = raw for offline; online has additional checks (placeholder for Phase 2)
+    verified_minutes = raw_minutes
+    session.verified_minutes = verified_minutes
+
+    # Anti-cheat check
+    daily_so_far = get_daily_verified_minutes(current_user.id, db)
+    anti_cheat_score, flag_reason = compute_anti_cheat_score(
+        db, current_user.id, session, daily_so_far
+    )
+    session.anti_cheat_score = anti_cheat_score
+    if should_flag(anti_cheat_score):
+        session.flagged = True
+        session.flag_reason = flag_reason
+        # Flagged sessions don't award full points/minutes to leaderboard
+        verified_minutes = 0
+
+    # Calculate points
+    points = calculate_points(verified_minutes, daily_so_far)
+    session.points_base = points
+    session.points_awarded = points
+
+    # Update user totals
+    current_user.verified_minutes_total += verified_minutes
+    current_user.points_total += points
+
+    # Update streak
+    _update_streak(current_user, now)
+
+    # First session completed (for referral bonus)
+    if verified_minutes > 0 and not current_user.first_session_completed:
+        current_user.first_session_completed = True
+        _auto_claim_referral(current_user, db)
+
+    # Social unlock time earned
+    social_earned = (verified_minutes // 60) * SOCIAL_UNLOCK_PER_HOUR
+    _add_social_unlock(current_user, social_earned, now)
+
+    # App lock credits earned (15 per verified hour, max 90)
+    from app.config import settings as app_settings
+    app_lock_earned = (verified_minutes // 60) * app_settings.APP_LOCK_CREDITS_PER_HOUR
+    if app_lock_earned > 0:
+        current_user.app_lock_credits = min(
+            current_user.app_lock_credits + app_lock_earned,
+            app_settings.APP_LOCK_MAX_CREDITS,
+        )
+
+    # Daily target → auto-unlock
+    daily_target_met = False
+    if current_user.daily_study_target_minutes and current_user.daily_study_target_minutes > 0:
+        today_minutes = get_daily_verified_minutes(current_user.id, db)
+        if today_minutes >= current_user.daily_study_target_minutes:
+            current_user.app_lock_enabled = False
+            daily_target_met = True
+            from app.services.notification_service import send_notification
+            try:
+                send_notification(db, current_user, "Daily Goal Reached!",
+                    f"Amazing! You hit your {current_user.daily_study_target_minutes}min study target today. Keep the streak alive!",
+                    "daily_target_met")
+            except Exception:
+                pass
+
+    # Ad double availability
+    ad_doubles_available = current_user.ad_doubles_used_today < 2
+
+    db.commit()
+    db.refresh(session)
+    db.refresh(current_user)
+
+    new_badges = check_and_award_badges(current_user, db)
+
+    return SessionEndOut(
+        session_id=session.id,
+        verified_minutes=verified_minutes,
+        points_awarded=points,
+        points_base=points,
+        streak_count=current_user.streak_count,
+        ad_double_available=ad_doubles_available and not session.flagged,
+        social_unlock_minutes_earned=social_earned,
+        flagged=session.flagged,
+        message="Great session! Keep up the focus." if not session.flagged else "Session flagged for review.",
+        new_badges=new_badges,
+        daily_target_met=daily_target_met,
+    )
+
+
+@router.post("/ad-double", response_model=SessionAdDoubleOut)
+async def ad_double_session(
+    body: SessionAdDoubleIn,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Apply 2x points multiplier after watching a rewarded ad (max 2/day)."""
+    session = (
+        db.query(StudySession)
+        .filter(
+            StudySession.id == body.session_id,
+            StudySession.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.flagged:
+        raise HTTPException(status_code=400, detail="Cannot double points on a flagged session")
+
+    new_points, success = apply_ad_double(current_user, session, db)
+    return SessionAdDoubleOut(
+        points_awarded=new_points,
+        success=success,
+        message="Points doubled!" if success else "Daily ad limit reached (max 2/day)",
+    )
+
+
+@router.post("/ad-extend")
+async def ad_extend_session(
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Extend the current active session by +15 verified minutes after watching a rewarded ad."""
+    session = (
+        db.query(StudySession)
+        .filter(
+            StudySession.user_id == current_user.id,
+            StudySession.is_active == True,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active session to extend")
+    EXTRA_MINUTES = 15
+    EXTRA_POINTS = 25
+    session.verified_minutes += EXTRA_MINUTES
+    session.points_awarded += EXTRA_POINTS
+    session.points_base += EXTRA_POINTS
+    current_user.verified_minutes_total += EXTRA_MINUTES
+    current_user.points_total += EXTRA_POINTS
+    db.commit()
+    return {
+        "status": "ok",
+        "extra_minutes": EXTRA_MINUTES,
+        "extra_points": EXTRA_POINTS,
+        "verified_minutes_total": session.verified_minutes,
+        "message": f"Session extended by {EXTRA_MINUTES} minutes!",
+    }
+
+
+@router.post("/{session_id}/pause", response_model=SessionPauseOut)
+async def pause_session(
+    session_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Pause an active session (user manually paused or app backgrounded)."""
+    session = (
+        db.query(StudySession)
+        .filter(
+            StudySession.id == session_id,
+            StudySession.user_id == current_user.id,
+            StudySession.is_active == True,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Active session not found")
+    now = datetime.now(timezone.utc)
+    session.is_paused = True
+    session.paused_at = now
+    db.commit()
+    return SessionPauseOut(status="paused", paused_at=now)
+
+
+@router.post("/{session_id}/resume", response_model=SessionResumeOut)
+async def resume_session(
+    session_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Resume a paused session."""
+    session = (
+        db.query(StudySession)
+        .filter(
+            StudySession.id == session_id,
+            StudySession.user_id == current_user.id,
+            StudySession.is_active == True,
+            StudySession.is_paused == True,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Paused session not found")
+    now = datetime.now(timezone.utc)
+    if session.paused_at:
+        paused_secs = int((now - session.paused_at).total_seconds())
+        session.total_paused_seconds += paused_secs
+    session.is_paused = False
+    session.paused_at = None
+    db.commit()
+    return SessionResumeOut(status="resumed", resumed_at=now)
+
+
+@router.post("/{session_id}/heartbeat", response_model=SessionHeartbeatOut)
+async def session_heartbeat(
+    session_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Heartbeat to keep session alive. Flutter calls every 30s during online mode."""
+    session = (
+        db.query(StudySession)
+        .filter(
+            StudySession.id == session_id,
+            StudySession.user_id == current_user.id,
+            StudySession.is_active == True,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Active session not found")
+    now = datetime.now(timezone.utc)
+    elapsed = int((now - session.start_time).total_seconds()) - session.total_paused_seconds
+    return SessionHeartbeatOut(status="ok", elapsed_seconds=max(0, elapsed))
+
+
+@router.get("/social-unlock", response_model=SocialUnlockOut)
+async def get_social_unlock(
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Get current social unlock bank status."""
+    now = datetime.now(timezone.utc)
+    _reset_social_unlock_if_needed(current_user, now)
+    db.commit()
+
+    ad_available, cooldown_secs = _check_social_ad_availability(current_user, now)
+
+    return SocialUnlockOut(
+        minutes_remaining=current_user.social_unlock_minutes_today,
+        minutes_earned_today=current_user.social_unlock_minutes_today,
+        ad_bonus_available=ad_available,
+        ad_bonus_cooldown_seconds=cooldown_secs if not ad_available else None,
+    )
+
+
+@router.post("/social-unlock/ad", response_model=SocialUnlockAdOut)
+async def claim_social_unlock_ad(
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Claim +5 min social unlock after watching a rewarded ad (once per 2hrs)."""
+    now = datetime.now(timezone.utc)
+    _reset_social_unlock_if_needed(current_user, now)
+
+    ad_available, cooldown_secs = _check_social_ad_availability(current_user, now)
+    if not ad_available:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Ad not yet available. Try again in {cooldown_secs // 60} minutes."
+        )
+
+    current_user.social_unlock_minutes_today += SOCIAL_UNLOCK_AD_BONUS
+    # Store last ad time in ad_doubles_reset_at (reuse field for simplicity)
+    # Actually use a dedicated approach via notification_prefs JSON
+    if current_user.notification_prefs is None:
+        current_user.notification_prefs = {}
+    current_user.notification_prefs = {
+        **current_user.notification_prefs,
+        "last_social_ad_at": now.isoformat(),
+    }
+    db.commit()
+    db.refresh(current_user)
+
+    next_available = now + timedelta(hours=SOCIAL_UNLOCK_AD_COOLDOWN_HRS)
+
+    return SocialUnlockAdOut(
+        minutes_added=SOCIAL_UNLOCK_AD_BONUS,
+        minutes_remaining=current_user.social_unlock_minutes_today,
+        next_ad_available_at=next_available,
+        success=True,
+    )
+
+
+@router.get("/history", response_model=list[SessionOut])
+async def get_session_history(
+    limit: int = 20,
+    offset: int = 0,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Get the current user's session history."""
+    sessions = (
+        db.query(StudySession)
+        .filter(
+            StudySession.user_id == current_user.id,
+            StudySession.is_active == False,
+        )
+        .order_by(StudySession.start_time.desc())
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+    return [SessionOut.model_validate(s) for s in sessions]
+
+
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+
+def _update_streak(user: User, now: datetime):
+    today = now.date()
+    if user.last_study_date:
+        last = user.last_study_date.date()
+        if last == today:
+            pass  # Already studied today
+        elif last == today - timedelta(days=1):
+            user.streak_count += 1
+        else:
+            user.streak_count = 1  # Streak broken
+    else:
+        user.streak_count = 1
+    user.last_study_date = now
+
+
+def _reset_social_unlock_if_needed(user: User, now: datetime):
+    """Reset social unlock bank at local midnight (approximated as UTC midnight)."""
+    if user.social_unlock_reset_at is None or user.social_unlock_reset_at.date() < now.date():
+        user.social_unlock_minutes_today = 0
+        user.social_unlock_reset_at = now
+
+
+def _add_social_unlock(user: User, minutes: int, now: datetime):
+    _reset_social_unlock_if_needed(user, now)
+    user.social_unlock_minutes_today += minutes
+
+
+def _check_social_ad_availability(user: User, now: datetime) -> tuple[bool, int]:
+    """Returns (is_available, cooldown_seconds_remaining)."""
+    prefs = user.notification_prefs or {}
+    last_ad_str = prefs.get("last_social_ad_at")
+    if not last_ad_str:
+        return True, 0
+    last_ad = datetime.fromisoformat(last_ad_str)
+    cooldown_end = last_ad + timedelta(hours=SOCIAL_UNLOCK_AD_COOLDOWN_HRS)
+    if now >= cooldown_end:
+        return True, 0
+    remaining = int((cooldown_end - now).total_seconds())
+    return False, remaining
+
+
+def _auto_claim_referral(user: User, db: DBSession):
+    """Auto-claim referral bonus for the referrer when referred user completes first session."""
+    if not user.referred_by_id:
+        return
+    referrer = db.query(User).filter(User.id == user.referred_by_id).first()
+    if not referrer:
+        return
+    REFERRAL_BONUS = 50
+    referrer.referral_bonus_earned += REFERRAL_BONUS
+    referrer.points_total += REFERRAL_BONUS
+    db.commit()

@@ -1,0 +1,25 @@
+ 
+ -------------- celery@Rohit v5.4.0 (opalescent)
+--- ***** ----- 
+-- ******* ---- Windows-10-10.0.26200-SP0 2026-07-08 00:29:13
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         studytimer:0x1e01c046810
+- ** ---------- .> transport:   redis://localhost:6379/1
+- ** ---------- .> results:     redis://localhost:6379/2
+- *** --- * --- .> concurrency: 8 (solo)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . app.tasks.class_auto_advance.advance_all_classes
+  . app.tasks.daily_study_reminder_scan.send_study_reminders
+  . app.tasks.flagged_session_scanner.scan_flagged_sessions
+  . app.tasks.midnight_reset.reset_social_unlock
+  . app.tasks.monthly_leaderboard_freeze.freeze_leaderboard
+  . app.tasks.question_generation.generate_quiz_questions
+  . app.tasks.streak_risk_scan.check_streak_risks
+

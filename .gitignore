@@ -1,0 +1,16 @@
+# Ignore local env and credentials
+.env
+firebase-credentials.json
+.env.*
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+.venv/
+
+# Editor files
+.vscode/
+*.swp

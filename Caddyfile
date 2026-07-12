@@ -1,0 +1,10 @@
+# Caddy reverse proxy for Quovex backend + dashboard
+# Auto-TLS via Let's Encrypt (requires DNS A records)
+
+api.quovex.online {
+    reverse_proxy backend:8000
+}
+
+admin.quovex.online {
+    reverse_proxy dashboard:3000
+}
