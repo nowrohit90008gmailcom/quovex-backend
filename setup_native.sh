@@ -53,7 +53,7 @@ log "System packages installed"
 
 # ─── 2. Create quovex user ───────────────────────────────────────────────────
 if ! id -u quovex &>/dev/null; then
-  useradd -r -s /bin/bash -d "$PROJECT_DIR" -m quovex
+  useradd -r -s /bin/bash -d "$PROJECT_DIR" quovex
   log "Created quovex user"
 fi
 
@@ -63,7 +63,11 @@ if [[ -d "$PROJECT_DIR/.git" ]]; then
   cd "$PROJECT_DIR" && git pull
 else
   log "Cloning repo..."
-  git clone "$REPO_URL" "$PROJECT_DIR"
+  # Directory may already exist (e.g. created by useradd) — clone into it
+  mkdir -p "$PROJECT_DIR"
+  git clone "$REPO_URL" "$PROJECT_DIR" 2>/dev/null || (
+    cd "$PROJECT_DIR" && git clone "$REPO_URL" .
+  )
   chown -R quovex:quovex "$PROJECT_DIR"
 fi
 
