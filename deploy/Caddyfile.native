@@ -1,0 +1,12 @@
+api.quovex.online {
+    reverse_proxy 127.0.0.1:8000
+
+    handle_path /downloads/* {
+        root * /opt/quovex/downloads
+        file_server browse
+    }
+}
+
+admin.quovex.online {
+    reverse_proxy 127.0.0.1:3000
+}

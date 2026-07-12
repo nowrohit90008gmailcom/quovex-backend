@@ -1,0 +1,19 @@
+[Unit]
+Description=Quovex Backend (uvicorn)
+After=network.target postgresql.service redis-server.service
+Requires=postgresql.service redis-server.service
+StartLimitIntervalSec=30
+
+[Service]
+Type=simple
+User=quovex
+Group=quovex
+WorkingDirectory=/opt/quovex
+EnvironmentFile=/opt/quovex/.env
+ExecStartPre=/opt/quovex/venv/bin/alembic upgrade head
+ExecStart=/opt/quovex/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-2} --access-log
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
