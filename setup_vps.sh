@@ -93,7 +93,8 @@ FROM_EMAIL=supportquovex@gmail.com
 ALLOWED_ORIGINS=["https://${DOMAIN_ADMIN}","https://quovex.online"]
 CEREBRAS_API_KEY=<your-cerebras-api-key>
 CEREBRAS_MODEL=llama3.1-8b-instruct
-STRIPE_SECRET_KEY=<your-stripe-secret-key>
+# Stripe key is optional (KYC is manual review — no Stripe Identity integration)
+# STRIPE_SECRET_KEY=sk_live_xxx
 REWARD_BUDGET_CAP_PERCENT=35
 BASE_POINTS_PER_HOUR=100
 DIMINISHING_RETURNS_AFTER_HOURS=6
