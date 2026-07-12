@@ -10,8 +10,9 @@ User=quovex
 Group=quovex
 WorkingDirectory=/opt/quovex
 EnvironmentFile=/opt/quovex/.env
+Environment=UVICORN_WORKERS=2
 ExecStartPre=/opt/quovex/venv/bin/alembic upgrade head
-ExecStart=/opt/quovex/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS:-2} --access-log
+ExecStart=/opt/quovex/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${UVICORN_WORKERS} --access-log
 Restart=always
 RestartSec=3
 
