@@ -21,7 +21,7 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("email", sa.String(), nullable=False, index=True),
         sa.Column("otp_hash", sa.String(), nullable=False),
-        sa.Column("verified", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("verified", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("ip_address", sa.String(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=True),
         sa.Column("verified_at", sa.DateTime(), nullable=True),
