@@ -34,7 +34,6 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_reports_report_type'), 'user_reports', ['report_type'], unique=False)
     op.create_index(op.f('ix_user_reports_user_id'), 'user_reports', ['user_id'], unique=False)
     op.create_foreign_key(None, 'quiz_sessions', 'topics', ['topic_id'], ['id'])
-    op.add_column('sessions', sa.Column('topic_id', sa.Uuid(), nullable=True))
     op.alter_column('sessions', 'mode',
                existing_type=sa.VARCHAR(length=7),
                type_=sa.Enum('offline', 'online', 'focus', 'exam', 'custom', 'pomodoro', name='studymode'),
@@ -50,7 +49,6 @@ def downgrade() -> None:
                existing_type=sa.Enum('offline', 'online', 'focus', 'exam', 'custom', 'pomodoro', name='studymode'),
                type_=sa.VARCHAR(length=7),
                existing_nullable=False)
-    op.drop_column('sessions', 'topic_id')
     op.drop_constraint(None, 'quiz_sessions', type_='foreignkey')
     op.drop_index(op.f('ix_user_reports_user_id'), table_name='user_reports')
     op.drop_index(op.f('ix_user_reports_report_type'), table_name='user_reports')
