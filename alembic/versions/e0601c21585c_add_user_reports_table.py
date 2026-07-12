@@ -47,7 +47,8 @@ def upgrade() -> None:
     op.alter_column('sessions', 'mode',
                existing_type=sa.VARCHAR(length=7),
                type_=sa.Enum('offline', 'online', 'focus', 'exam', 'custom', 'pomodoro', name='studymode'),
-               existing_nullable=False)
+               existing_nullable=False,
+               postgresql_using='mode::studymode')
     op.create_foreign_key(None, 'sessions', 'topics', ['topic_id'], ['id'])
     # ### end Alembic commands ###
 
