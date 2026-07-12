@@ -27,6 +27,7 @@ fi
 # ─── 1. System Packages ──────────────────────────────────────────────────────
 log "Updating system packages..."
 apt-get update -qq
+apt-get --fix-broken install -y -qq || true
 apt-get upgrade -y -qq || true
 apt-get install -y -qq \
   curl git ufw \
@@ -35,8 +36,15 @@ apt-get install -y -qq \
   python3 python3-venv python3-pip python3-dev \
   libpq-dev gcc \
   nodejs npm \
-  caddy \
-  ca-certificates gnupg
+  ca-certificates gnupg apt-transport-https \
+  debian-keyring debian-archive-keyring
+
+# Install Caddy (not in default Ubuntu repos)
+log "Installing Caddy..."
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+apt-get update -qq
+apt-get install -y -qq caddy
 
 log "System packages installed"
 
