@@ -10,7 +10,7 @@ User=quovex
 Group=quovex
 WorkingDirectory=/opt/quovex
 EnvironmentFile=/opt/quovex/.env
-ExecStart=/opt/quovex/venv/bin/celery -A app.core.celery_app worker --loglevel=info --concurrency=2
+ExecStart=/opt/quovex/venv/bin/celery -A app.tasks.celery_app worker --loglevel=info --concurrency=2
 Restart=always
 RestartSec=3
 
