@@ -16,14 +16,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source
 COPY . .
 
+# Copy & fix entrypoint before switching user
+COPY --chmod=755 entrypoint.sh /entrypoint.sh
+
 # Non-root user
 RUN addgroup --system app && adduser --system --group app
 RUN chown -R app:app /app
 USER app
 
 EXPOSE 8000
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
