@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #00288e;
+  --primary-container: #1e40af;
+  --on-primary: #ffffff;
+  --secondary: #855300;
+  --secondary-container: #fea619;
+  --on-secondary: #ffffff;
+  --tertiary: #611e00;
+  --tertiary-container: #872d00;
+
+  --surface: #f9f9ff;
+  --surface-container: #e9edff;
+  --surface-container-low: #f1f3ff;
+  --surface-container-high: #e1e8fd;
+  --surface-container-lowest: #ffffff;
+  --surface-bright: #f9f9ff;
+  --surface-dim: #d3daef;
+
+  --on-surface: #141b2b;
+  --on-surface-variant: #444653;
+  --on-background: #141b2b;
+
+  --outline: #757684;
+  --outline-variant: #c4c5d5;
+
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error: #ffffff;
+
+  --sidebar-bg: #111827;
+  --sidebar-hover: #1F2937;
+  --sidebar-active: #1F2937;
+  --sidebar-text: #ffffff;
+  --sidebar-text-muted: #9CA3AF;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--surface);
+  color: var(--on-surface);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--outline-variant); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--outline); }
+
+.badge-active    { background: #d1e7dd; color: #0f5132; }
+.badge-banned    { background: #f8d7da; color: #842029; }
+.badge-pending   { background: #fff3cd; color: #856404; }
+.badge-kyc       { background: #cfe2ff; color: #084298; }
+.badge-approved  { background: #d1e7dd; color: #0f5132; }
+.badge-sent      { background: #dce2f7; color: #00288e; }
+.badge-rejected  { background: #f8d7da; color: #842029; }
+.badge-flagged   { background: #f8d7da; color: #842029; }
+.badge-inactive  { background: #e9ecef; color: #495057; }
+.badge-verified  { background: #d1e7dd; color: #0f5132; }
+.badge-expired   { background: #f8d7da; color: #842029; }
+
+* { transition-property: color, background-color, border-color, box-shadow;
+    transition-duration: 150ms; transition-timing-function: ease; }

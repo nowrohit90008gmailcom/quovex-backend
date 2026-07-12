@@ -11,6 +11,13 @@ __pycache__/
 venv/
 .venv/
 
+# Database
+*.db
+
+# Logs
+*.log
+*.txt
+
 # Editor files
 .vscode/
 *.swp
