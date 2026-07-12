@@ -176,8 +176,10 @@ ufw allow 443/tcp comment 'HTTPS'
 ufw --force enable
 log "Firewall active: ports 22, 80, 443"
 
-# ─── 11. Run Migrations ──────────────────────────────────────────────────────
+# ─── 11. Run Migrations ───────────────────────────────────────────────────────
 log "Running Alembic migrations..."
+# Export .env so alembic picks up DATABASE_URL (PostgreSQL) instead of SQLite fallback
+set -a; source "$PROJECT_DIR/.env"; set +a
 cd "$PROJECT_DIR" && ./venv/bin/alembic upgrade head
 
 # ─── 12. Create Admin Accounts ───────────────────────────────────────────────

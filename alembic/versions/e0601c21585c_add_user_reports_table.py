@@ -43,13 +43,15 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_reports_report_type'), 'user_reports', ['report_type'], unique=False)
     op.create_index(op.f('ix_user_reports_user_id'), 'user_reports', ['user_id'], unique=False)
-    op.create_foreign_key(None, 'quiz_sessions', 'topics', ['topic_id'], ['id'])
-    op.alter_column('sessions', 'mode',
-               existing_type=sa.VARCHAR(length=7),
-               type_=sa.Enum('offline', 'online', 'focus', 'exam', 'custom', 'pomodoro', name='studymode'),
-               existing_nullable=False,
-               postgresql_using='mode::studymode')
-    op.create_foreign_key(None, 'sessions', 'topics', ['topic_id'], ['id'])
+    # PostgreSQL-only: SQLite does not support ADD CONSTRAINT or ALTER COLUMN type
+    if bind.engine.name == "postgresql":
+        op.create_foreign_key(None, 'quiz_sessions', 'topics', ['topic_id'], ['id'])
+        op.alter_column('sessions', 'mode',
+                   existing_type=sa.VARCHAR(length=7),
+                   type_=sa.Enum('offline', 'online', 'focus', 'exam', 'custom', 'pomodoro', name='studymode'),
+                   existing_nullable=False,
+                   postgresql_using='mode::studymode')
+        op.create_foreign_key(None, 'sessions', 'topics', ['topic_id'], ['id'])
     # ### end Alembic commands ###
 
 
