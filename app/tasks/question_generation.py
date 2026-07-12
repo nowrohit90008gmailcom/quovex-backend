@@ -2,6 +2,7 @@
 import json
 import logging
 import random
+import time
 from datetime import datetime, timezone
 from typing import List
 
@@ -94,34 +95,41 @@ def generate_quiz_questions(subject: str = None, exam_tag: str = None, count_per
 
 
 def _call_cerebras(api_key: str, subject: str, exam_tag: str, difficulty: str, count: int) -> List[dict]:
-    """Call Cerebras API for question generation."""
+    """Call Cerebras API for question generation with key rotation on retry."""
     prompt = GENERATION_PROMPT.format(
         count=count, subject=subject, exam_tag=exam_tag, difficulty=difficulty
     )
 
-    response = httpx.post(
-        "https://api.cerebras.ai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": settings.CEREBRAS_MODEL,
-            "messages": [
-                {"role": "system", "content": "You are an expert exam question writer. Return only valid JSON."},
-                {"role": "user", "content": prompt},
-            ],
-            "temperature": 0.7,
-            "max_tokens": 4096,
-        },
-        timeout=60,
-    )
-    response.raise_for_status()
-
-    content = response.json()["choices"][0]["message"]["content"]
-    start = content.find("[")
-    end = content.rfind("]") + 1
-    if start == -1 or end == 0:
-        raise ValueError("No JSON array found in response")
-
-    return json.loads(content[start:end])
+    last_exc = None
+    for attempt in range(3):
+        try:
+            response = httpx.post(
+                "https://api.cerebras.ai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": settings.CEREBRAS_MODEL,
+                    "messages": [
+                        {"role": "system", "content": "You are an expert exam question writer. Return only valid JSON."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 4096,
+                },
+                timeout=60,
+            )
+            response.raise_for_status()
+            content = response.json()["choices"][0]["message"]["content"]
+            start = content.find("[")
+            end = content.rfind("]") + 1
+            if start == -1 or end == 0:
+                raise ValueError("No JSON array found in response")
+            return json.loads(content[start:end])
+        except Exception as e:
+            last_exc = e
+            if attempt < 2:
+                api_key = _pick_api_key()
+                time.sleep(1 + attempt)
+    raise last_exc

@@ -1,6 +1,7 @@
 """AI-powered study report generation using Cerebras API."""
 import json
 import logging
+import time
 from datetime import datetime, timezone, timedelta, date
 from typing import Optional
 from uuid import UUID
@@ -62,34 +63,41 @@ def _pick_api_key() -> str:
 
 
 def _call_cerebras(prompt: str) -> dict:
-    api_key = _pick_api_key()
-    if not api_key:
-        raise ValueError("No Cerebras API keys configured")
-
-    response = httpx.post(
-        "https://api.cerebras.ai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": settings.CEREBRAS_MODEL,
-            "messages": [
-                {"role": "system", "content": "You are an expert AI study coach. Return only valid JSON."},
-                {"role": "user", "content": prompt},
-            ],
-            "temperature": 0.7,
-            "max_tokens": 2048,
-        },
-        timeout=60,
-    )
-    response.raise_for_status()
-    content = response.json()["choices"][0]["message"]["content"]
-    start = content.find("{")
-    end = content.rfind("}") + 1
-    if start == -1 or end == 0:
-        raise ValueError("No JSON object found in response")
-    return json.loads(content[start:end])
+    last_exc = None
+    for attempt in range(3):
+        api_key = _pick_api_key()
+        if not api_key:
+            raise ValueError("No Cerebras API keys configured")
+        try:
+            response = httpx.post(
+                "https://api.cerebras.ai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": settings.CEREBRAS_MODEL,
+                    "messages": [
+                        {"role": "system", "content": "You are an expert AI study coach. Return only valid JSON."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 2048,
+                },
+                timeout=60,
+            )
+            response.raise_for_status()
+            content = response.json()["choices"][0]["message"]["content"]
+            start = content.find("{")
+            end = content.rfind("}") + 1
+            if start == -1 or end == 0:
+                raise ValueError("No JSON object found in response")
+            return json.loads(content[start:end])
+        except Exception as e:
+            last_exc = e
+            if attempt < 2:
+                time.sleep(1 + attempt)
+    raise last_exc
 
 
 def generate_report(user: User, report_type: str, db: DBSession) -> UserReport:
