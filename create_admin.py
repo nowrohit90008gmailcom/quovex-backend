@@ -20,7 +20,7 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 os.environ.setdefault("ENVIRONMENT", "development")
 
 import bcrypt
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, func
 from sqlalchemy.orm import Session
 
 ADMINS = [
@@ -78,7 +78,7 @@ def main():
 
     with Session(engine) as db:
         for a in ADMINS:
-            existing = db.query(User).filter(User.email == a["email"]).first()
+            existing = db.query(User).filter(func.lower(User.email) == func.lower(a["email"])).first()
             if existing:
                 updated = False
                 role_val = a["role"]
