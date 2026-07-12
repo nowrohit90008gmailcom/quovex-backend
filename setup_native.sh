@@ -155,7 +155,7 @@ log "PostgreSQL configured"
 
 # ─── 8. Redis Setup ──────────────────────────────────────────────────────────
 log "Configuring Redis..."
-sed -i "s/^# requirepass .*/requirepass ${REDIS_PASSWORD}/" /etc/redis/redis.conf
+sed -i "s|^# requirepass .*|requirepass ${REDIS_PASSWORD}|" /etc/redis/redis.conf
 systemctl enable --now redis-server
 log "Redis configured"
 
