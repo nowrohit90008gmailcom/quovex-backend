@@ -7,10 +7,9 @@ StartLimitIntervalSec=30
 Type=simple
 User=quovex
 Group=quovex
-WorkingDirectory=/opt/quovex/dashboard
+WorkingDirectory=/opt/quovex/dashboard/.next/standalone
 Environment=NODE_ENV=production
-Environment=NEXT_PUBLIC_API_URL=https://api.quovex.online/api/v1
-ExecStart=/usr/bin/node /opt/quovex/dashboard/server.js
+ExecStart=/usr/bin/node server.js
 Restart=always
 RestartSec=3
 
