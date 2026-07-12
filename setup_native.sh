@@ -91,10 +91,10 @@ if [[ -f "$PROJECT_DIR/.env" ]]; then
 fi
 
 SECRET_KEY=$(openssl rand -hex 32)
-POSTGRES_PASSWORD=$(openssl rand -base64 24)
-REDIS_PASSWORD=$(openssl rand -base64 24)
-ADMIN_PASSWORD_1=$(openssl rand -base64 18)
-ADMIN_PASSWORD_2=$(openssl rand -base64 18)
+POSTGRES_PASSWORD=$(openssl rand -hex 24)
+REDIS_PASSWORD=$(openssl rand -hex 24)
+ADMIN_PASSWORD_1=$(openssl rand -hex 18)
+ADMIN_PASSWORD_2=$(openssl rand -hex 18)
 
 cat > "$PROJECT_DIR/.env" <<ENVEOF
 ENVIRONMENT=production
