@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePageHeader } from '@/components/layout/HeaderContext';
 import { apiFetch } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -35,6 +35,7 @@ export default function QuizPage() {
   const [data, setData] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const generatingRef = useRef(false);
   const [filterSubject, setFilterSubject] = useState('all');
   const [filterExam, setFilterExam] = useState('all');
   const [filterDiff, setFilterDiff] = useState('all');
@@ -59,13 +60,17 @@ export default function QuizPage() {
   };
 
   const handleGenerate = async () => {
+    if (generatingRef.current) return;
+    generatingRef.current = true;
     setGenerating(true);
     try {
       await apiFetch('/admin/quiz/generate', { method: 'POST' });
-      showToast('Question generation job queued');
+      showToast('720 questions queued — refresh in a few seconds');
+      setTimeout(load, 5000);
     } catch (e: any) {
       showToast(e.message, false);
     } finally {
+      generatingRef.current = false;
       setGenerating(false);
     }
   };
