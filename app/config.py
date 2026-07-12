@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     FIREBASE_SERVICE_ACCOUNT_JSON: Optional[str] = ""
     CEREBRAS_API_KEY: str = ""
     CEREBRAS_API_KEYS: str = ""
-    CEREBRAS_MODEL: str = "llama3.1-8b-instruct"
+    CEREBRAS_MODEL: str = "gpt-oss-120b"
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
