@@ -42,10 +42,8 @@ async def admin_login(body: AdminLoginIn, request: Request, db: Session = Depend
     Returns a signed JWT (not a Firebase token).
     Only works for users with an admin_role set.
     """
-    from passlib.context import CryptContext
+    import bcrypt
     import os
-
-    pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     user = db.query(User).filter(User.email == body.email).first()
 
@@ -63,7 +61,7 @@ async def admin_login(body: AdminLoginIn, request: Request, db: Session = Depend
 
     # Verify password
     if user.password_hash:
-        if not pwd_ctx.verify(body.password, user.password_hash):
+        if not bcrypt.checkpw(body.password.encode(), user.password_hash.encode()):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
     elif dev_mode and body.password == "dev":
         # Dev mode: no password set yet, accept "dev" as password

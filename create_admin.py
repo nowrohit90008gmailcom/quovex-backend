@@ -15,11 +15,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 os.environ.setdefault("ENVIRONMENT", "development")
 
+import bcrypt
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
-
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ADMINS = [
     {
@@ -86,8 +84,8 @@ def main():
                 if not existing.firebase_uid:
                     existing.firebase_uid = f"admin-{a['email'].split('@')[0].lower()}"
                     updated = True
-                if existing.password_hash != pwd_ctx.hash(a["password"]):
-                    existing.password_hash = pwd_ctx.hash(a["password"])
+                if not bcrypt.checkpw(a["password"].encode(), existing.password_hash.encode()):
+                    existing.password_hash = bcrypt.hashpw(a["password"].encode(), bcrypt.gensalt()).decode()
                     updated = True
                 if updated:
                     db.commit()
@@ -99,7 +97,7 @@ def main():
             user = User(
                 email=a["email"],
                 display_name=a["email"].split("@")[0],
-                password_hash=pwd_ctx.hash(a["password"]),
+                password_hash=bcrypt.hashpw(a["password"].encode(), bcrypt.gensalt()).decode(),
                 admin_role=AdminRole(a["role"]),
                 firebase_uid=f"admin-{a['email'].split('@')[0].lower()}",
                 country="IN",
