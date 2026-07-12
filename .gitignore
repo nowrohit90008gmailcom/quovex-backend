@@ -18,6 +18,11 @@ venv/
 *.log
 *.txt
 
+# Dashboard node modules
+node_modules/
+.next/
+out/
+
 # Editor files
 .vscode/
 *.swp
