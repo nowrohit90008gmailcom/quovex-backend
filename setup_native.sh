@@ -58,18 +58,10 @@ if ! id -u quovex &>/dev/null; then
 fi
 
 # ─── 3. Clone / Pull Repo ────────────────────────────────────────────────────
-if [[ -d "$PROJECT_DIR/.git" ]]; then
-  warn "Repo exists — pulling latest..."
-  cd "$PROJECT_DIR" && git pull
-else
-  log "Cloning repo..."
-  # Directory may already exist (e.g. created by useradd) — clone into it
-  mkdir -p "$PROJECT_DIR"
-  git clone "$REPO_URL" "$PROJECT_DIR" 2>/dev/null || (
-    cd "$PROJECT_DIR" && git clone "$REPO_URL" .
-  )
-  chown -R quovex:quovex "$PROJECT_DIR"
-fi
+log "Cloning repo..."
+rm -rf "$PROJECT_DIR"
+git clone "$REPO_URL" "$PROJECT_DIR"
+chown -R quovex:quovex "$PROJECT_DIR"
 
 # ─── 4. Python Virtual Environment ───────────────────────────────────────────
 if [[ ! -d "$PROJECT_DIR/venv" ]]; then
