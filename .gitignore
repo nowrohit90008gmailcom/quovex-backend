@@ -1,7 +1,8 @@
 # Ignore local env and credentials
 .env
 firebase-credentials.json
-.env.*
+.env.local
+.env.production
 
 # Python artifacts
 __pycache__/

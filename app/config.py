@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
-    STRIPE_SECRET_KEY: str = ""
+
     REWARD_BUDGET_CAP_PERCENT: int = 35
     BASE_POINTS_PER_HOUR: int = 100
     DIMINISHING_RETURNS_AFTER_HOURS: int = 6

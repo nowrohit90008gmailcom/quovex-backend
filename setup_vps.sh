@@ -93,8 +93,6 @@ FROM_EMAIL=supportquovex@gmail.com
 ALLOWED_ORIGINS=["https://${DOMAIN_ADMIN}","https://quovex.online"]
 CEREBRAS_API_KEY=<your-cerebras-api-key>
 CEREBRAS_MODEL=llama3.1-8b-instruct
-# Stripe key is optional (KYC is manual review — no Stripe Identity integration)
-# STRIPE_SECRET_KEY=sk_live_xxx
 REWARD_BUDGET_CAP_PERCENT=35
 BASE_POINTS_PER_HOUR=100
 DIMINISHING_RETURNS_AFTER_HOURS=6
@@ -107,8 +105,7 @@ ENVEOF
 
   warn "============================================"
   warn "  .env created — EDIT IT before continuing!"
-  warn "  Fill in: EMAIL_PASS, CEREBRAS_API_KEY,"
-  warn "  STRIPE_SECRET_KEY"
+  warn "  Fill in: EMAIL_PASS, CEREBRAS_API_KEY"
   warn "============================================"
   warn ""
   warn "  Also place firebase-credentials.json in:"
