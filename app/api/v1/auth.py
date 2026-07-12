@@ -3,6 +3,7 @@ and admin dashboard login via email + password (JWT)."""
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 
@@ -45,7 +46,7 @@ async def admin_login(body: AdminLoginIn, request: Request, db: Session = Depend
     import bcrypt
     import os
 
-    user = db.query(User).filter(User.email == body.email).first()
+    user = db.query(User).filter(func.lower(User.email) == func.lower(body.email)).first()
 
     # Dev mode shortcut: allow login with password "dev" if no password set
     dev_mode = os.environ.get("ENVIRONMENT", "development") == "development"
