@@ -29,13 +29,16 @@ log "Updating system packages..."
 apt-get update -qq
 apt-get --fix-broken install -y -qq || true
 apt-get upgrade -y -qq || true
+# Install Node.js 20.x (Ubuntu 22.04 default node is too old)
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
 apt-get install -y -qq \
   curl git ufw \
   postgresql postgresql-client \
   redis-server \
   python3 python3-venv python3-pip python3-dev \
   libpq-dev gcc \
-  nodejs npm \
+  nodejs \
   ca-certificates gnupg apt-transport-https \
   debian-keyring debian-archive-keyring
 
