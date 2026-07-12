@@ -22,9 +22,29 @@ from passlib.context import CryptContext
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ADMINS = [
-    {"email": "Rohit@Quovex.online", "password": "somehowimetyou", "role": "superadmin"},
-    {"email": "Kartikey@quovex.online", "password": "somehowyouleftme", "role": "superadmin"},
+    {
+        "email": os.environ.get("ADMIN_EMAIL_1", "Rohit@Quovex.online"),
+        "password": os.environ.get("ADMIN_PASSWORD_1", "somehowimetyou"),
+        "role": "superadmin",
+    },
+    {
+        "email": os.environ.get("ADMIN_EMAIL_2", "Kartikey@Quovex.online"),
+        "password": os.environ.get("ADMIN_PASSWORD_2", "somehowyouleftme"),
+        "role": "superadmin",
+    },
 ]
+
+_any_default = any(
+    a["password"] in ("somehowimetyou", "somehowyouleftme")
+    and "ADMIN_PASSWORD" not in os.environ
+    for a in ADMINS
+)
+if _any_default:
+    import logging
+    logging.warning(
+        "Using default admin passwords via env — set ADMIN_PASSWORD_1 / ADMIN_PASSWORD_2 "
+        "for production security"
+    )
 
 
 def get_engine():

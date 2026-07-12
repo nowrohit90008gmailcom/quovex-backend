@@ -75,6 +75,8 @@ else
   SECRET_KEY=$(openssl rand -hex 32)
   POSTGRES_PASSWORD=$(openssl rand -base64 24)
   REDIS_PASSWORD=$(openssl rand -base64 24)
+  ADMIN_PASSWORD_1=$(openssl rand -base64 18)
+  ADMIN_PASSWORD_2=$(openssl rand -base64 18)
 
   cat > .env <<ENVEOF
 ENVIRONMENT=production
@@ -95,6 +97,10 @@ EMAIL_USER=supportquovex@gmail.com
 EMAIL_PASS=<your-gmail-app-password>
 FROM_EMAIL=supportquovex@gmail.com
 ALLOWED_ORIGINS=["https://${DOMAIN_ADMIN}","https://quovex.online"]
+ADMIN_EMAIL_1=Rohit@Quovex.online
+ADMIN_PASSWORD_1=${ADMIN_PASSWORD_1}
+ADMIN_EMAIL_2=Kartikey@Quovex.online
+ADMIN_PASSWORD_2=${ADMIN_PASSWORD_2}
 CEREBRAS_API_KEY=<your-cerebras-api-key>
 CEREBRAS_MODEL=llama3.1-8b-instruct
 REWARD_BUDGET_CAP_PERCENT=35
@@ -157,7 +163,7 @@ log "Running Alembic migrations..."
 docker compose -f docker-compose.prod.yml run --rm backend alembic upgrade head
 
 # ─── 9. Create Admin Accounts ─────────────────────────────────────────────────
-log "Creating admin accounts..."
+log "Creating admin accounts (passwords from .env)..."
 docker compose -f docker-compose.prod.yml run --rm backend python create_admin.py
 
 # ─── 10. Final Status ─────────────────────────────────────────────────────────
@@ -169,9 +175,9 @@ log "  API:      https://${DOMAIN_API}/health"
 log "  Dashboard: https://${DOMAIN_ADMIN}"
 log "  Website:   https://quovex.online (Vercel)"
 log ""
-log "  Admin login:"
-log "    Rohit@Quovex.online / somehowimetyou"
-log "    Kartikey@Quovex.online / somehowyouleftme"
+log "  Admin login credentials (saved in .env):"
+log "    ${ADMIN_EMAIL_1:-Rohit@Quovex.online} / ${ADMIN_PASSWORD_1}"
+log "    ${ADMIN_EMAIL_2:-Kartikey@Quovex.online} / ${ADMIN_PASSWORD_2}"
 log ""
 warn "  NEXT STEPS:"
 warn "  1. Point DNS A records to this server's IP:"
