@@ -180,11 +180,11 @@ log "Firewall active: ports 22, 80, 443"
 
 # ─── 11. Run Migrations ──────────────────────────────────────────────────────
 log "Running Alembic migrations..."
-su - quovex -c "cd $PROJECT_DIR && export \$(grep -v '^#' .env | xargs) && ./venv/bin/alembic upgrade head"
+cd "$PROJECT_DIR" && ./venv/bin/alembic upgrade head
 
 # ─── 12. Create Admin Accounts ───────────────────────────────────────────────
 log "Creating admin accounts..."
-su - quovex -c "cd $PROJECT_DIR && export \$(grep -v '^#' .env | xargs) && ./venv/bin/python create_admin.py"
+cd "$PROJECT_DIR" && ./venv/bin/python create_admin.py
 
 # ─── 13. Install systemd Services ────────────────────────────────────────────
 log "Installing systemd service files..."
