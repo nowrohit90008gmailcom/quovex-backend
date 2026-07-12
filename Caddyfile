@@ -3,8 +3,19 @@
 
 api.quovex.online {
     reverse_proxy backend:8000
+
+    # Serve APK downloads
+    handle_path /downloads/* {
+        root * /app/downloads
+        file_server browse
+    }
 }
 
 admin.quovex.online {
     reverse_proxy dashboard:3000
+}
+
+downloads.quovex.online {
+    root * /app/downloads
+    file_server browse
 }

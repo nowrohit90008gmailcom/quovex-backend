@@ -130,6 +130,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
+      - ./downloads:/app/downloads
     depends_on:
       - backend
       - dashboard

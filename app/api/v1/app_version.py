@@ -11,7 +11,7 @@ router = APIRouter(tags=["app"])
 DEFAULT_VERSIONS = {
     "latest_version": "1.0.0",
     "min_version": "1.0.0",
-    "update_url": "https://quovex.online/download",
+    "update_url": "https://api.quovex.online/downloads/app-release.apk",
     "force_update": False,
     "release_notes": "",
 }
