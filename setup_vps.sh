@@ -29,8 +29,12 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # ─── 1. System Packages ───────────────────────────────────────────────────────
+log "Fixing any broken packages..."
+apt-get --fix-broken install -y -qq 2>/dev/null || true
+
 log "Updating system packages..."
-apt-get update -qq && apt-get upgrade -y -qq
+apt-get update -qq
+apt-get upgrade -y -qq || true
 
 log "Installing dependencies..."
 apt-get install -y -qq \
