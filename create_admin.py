@@ -58,13 +58,22 @@ def main():
         for a in ADMINS:
             existing = db.query(User).filter(User.email == a["email"]).first()
             if existing:
-                if existing.admin_role is None or existing.admin_role.value != a["role"]:
-                    existing.admin_role = AdminRole(a["role"])
+                updated = False
+                role_val = a["role"]
+                if existing.admin_role is None or existing.admin_role.value != role_val:
+                    existing.admin_role = AdminRole(role_val)
+                    updated = True
+                if not existing.firebase_uid:
+                    existing.firebase_uid = f"admin-{a['email'].split('@')[0].lower()}"
+                    updated = True
+                if existing.password_hash != pwd_ctx.hash(a["password"]):
                     existing.password_hash = pwd_ctx.hash(a["password"])
+                    updated = True
+                if updated:
                     db.commit()
-                    print(f"✓ Updated {a['email']} — role set to {a['role']}")
+                    print(f"[OK] Updated {a['email']}")
                 else:
-                    print(f"✓ {a['email']} already exists with role {a['role']} — skipping")
+                    print(f"[OK] {a['email']} already up to date -- skipping")
                 continue
 
             user = User(
@@ -72,14 +81,14 @@ def main():
                 display_name=a["email"].split("@")[0],
                 password_hash=pwd_ctx.hash(a["password"]),
                 admin_role=AdminRole(a["role"]),
-                is_verified=True,
+                firebase_uid=f"admin-{a['email'].split('@')[0].lower()}",
                 country="IN",
                 exam_tags=["JEE"],
                 created_at=datetime.now(timezone.utc),
             )
             db.add(user)
             db.commit()
-            print(f"✓ Created {a['email']} as {a['role']}")
+            print(f"[OK] Created {a['email']} as {a['role']}")
 
     print("\nDone. You can now log in at https://admin.quovex.online")
 
