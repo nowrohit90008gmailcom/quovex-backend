@@ -162,8 +162,8 @@ log "Redis configured"
 # ─── 9. Caddy Setup ──────────────────────────────────────────────────────────
 log "Configuring Caddy..."
 cp "$PROJECT_DIR/deploy/Caddyfile.native" /etc/caddy/Caddyfile
-mkdir -p "$PROJECT_DIR/downloads"
-chown -R quovex:quovex "$PROJECT_DIR/downloads"
+mkdir -p "$PROJECT_DIR/downloads" "$PROJECT_DIR/uploads"
+chown -R quovex:quovex "$PROJECT_DIR/downloads" "$PROJECT_DIR/uploads"
 systemctl enable --now caddy
 log "Caddy configured"
 

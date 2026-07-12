@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     QUIZ_QUESTION_TIME_LIMIT_SECONDS: int = 25
     MAX_QUIZ_ATTEMPTS_PER_SUBJECT_PER_DAY: int = 5
 
-    UPLOAD_DIR: str = "/app/uploads"
+    UPLOAD_DIR: str = "/opt/quovex/uploads"
 
     class Config:
         env_file = ".env"
