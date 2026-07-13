@@ -16,9 +16,8 @@ celery_app = Celery(
         "app.tasks.question_generation",
         "app.tasks.class_auto_advance",  # April 1 class advancement
         "app.tasks.kyc_reminder_scan",
-        # BUG FIX: weekly_accuracy_drop_scan existed as a task file but was not
-        # registered in the include list, so Celery would never discover it.
         "app.tasks.weekly_accuracy_drop_scan",
+        "app.tasks.report_generation",
     ],
 )
 
@@ -63,6 +62,16 @@ celery_app.conf.beat_schedule = {
     "kyc-reminder-scan": {
         "task": "app.tasks.kyc_reminder_scan.kyc_reminder_scan",
         "schedule": crontab(minute=0, hour=12),
+    },
+    # Daily AI reports: runs at 23:00 UTC (active users today)
+    "daily-ai-reports": {
+        "task": "app.tasks.report_generation.generate_daily_reports",
+        "schedule": crontab(minute=0, hour=23),
+    },
+    # Weekly AI reports: runs at 23:30 UTC on Sunday
+    "weekly-ai-reports": {
+        "task": "app.tasks.report_generation.generate_weekly_reports",
+        "schedule": crontab(minute=30, hour=23, day_of_week=0),
     },
 }
 

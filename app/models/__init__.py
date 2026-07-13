@@ -165,6 +165,7 @@ class User(Base, TimestampMixin):
     referral_code = Column(String(20), unique=True, nullable=True, index=True)
     referred_by_id = Column(Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True)
     referral_bonus_earned = Column(Integer, default=0, nullable=False)
+    referral_bonus_paid = Column(Boolean, default=False, nullable=False)
     first_session_completed = Column(Boolean, default=False, nullable=False)
 
     # FCM push token

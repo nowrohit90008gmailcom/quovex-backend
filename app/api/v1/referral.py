@@ -51,9 +51,12 @@ async def claim_referral_bonus(
         raise HTTPException(status_code=400, detail="This user was not referred by you")
     if not referred.first_session_completed:
         raise HTTPException(status_code=400, detail="User has not completed their first session yet")
+    if referred.referral_bonus_paid:
+        raise HTTPException(status_code=400, detail="Referral bonus already claimed for this user")
 
     current_user.referral_bonus_earned += REFERRAL_BONUS_FIRST_SESSION
     current_user.points_total += REFERRAL_BONUS_FIRST_SESSION
+    referred.referral_bonus_paid = True
     db.commit()
     db.refresh(current_user)
     return ReferralClaimOut(

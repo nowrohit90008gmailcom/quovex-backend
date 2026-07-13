@@ -58,6 +58,10 @@ if ! id -u quovex &>/dev/null; then
 fi
 
 # ─── 3. Clone / Pull Repo ────────────────────────────────────────────────────
+if [[ -z "$PROJECT_DIR" ]]; then
+  err "PROJECT_DIR is empty — aborting"
+  exit 1
+fi
 log "Cloning repo..."
 rm -rf "$PROJECT_DIR"
 git clone "$REPO_URL" "$PROJECT_DIR"

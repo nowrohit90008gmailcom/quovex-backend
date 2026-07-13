@@ -465,10 +465,13 @@ def _auto_claim_referral(user: User, db: DBSession):
     """Auto-claim referral bonus for the referrer when referred user completes first session."""
     if not user.referred_by_id:
         return
+    if user.referral_bonus_paid:
+        return
     referrer = db.query(User).filter(User.id == user.referred_by_id).first()
     if not referrer:
         return
     REFERRAL_BONUS = 50
     referrer.referral_bonus_earned += REFERRAL_BONUS
     referrer.points_total += REFERRAL_BONUS
+    user.referral_bonus_paid = True
     db.commit()
