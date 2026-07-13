@@ -726,6 +726,11 @@ async def get_settings(
         "cerebras_model": settings.CEREBRAS_MODEL,
         "questions_per_batch": "20",
         "auto_approve_threshold": "0",
+        "app_latest_version": "1.0.0",
+        "app_min_version": "1.0.0",
+        "app_update_url": "https://api.quovex.online/downloads/app-release.apk",
+        "app_force_update": "false",
+        "app_release_notes": "",
     }
     return _get_all_settings(db, defaults)
 
