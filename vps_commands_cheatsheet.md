@@ -63,6 +63,7 @@ systemctl restart quovex-backend quovex-celery-worker
 ```bash
 cd /opt/quovex
 ./venv/bin/alembic upgrade head
+systemctl restart quovex-backend
 ```
 
 **If you changed the Next.js Dashboard code:**
@@ -83,7 +84,44 @@ psql -d quovex
 ```
 *(Type `\q` and hit Enter to exit, then type `exit` to go back to root).*
 
-## 5. File Transfers (Run these on your local PC!)
+## 5. Server Health and Troubleshooting
+Commands to check how your VPS is performing and if you are running out of resources.
+
+**Check available Memory (RAM):**
+```bash
+free -h
+```
+
+**Check available Disk Space:**
+```bash
+df -h /
+```
+
+**View active processes (like Task Manager):**
+```bash
+htop
+```
+*(Press `q` or `F10` to exit htop)*
+
+**Reboot the entire VPS server safely:**
+```bash
+reboot
+```
+
+## 6. Security and SSL
+Caddy handles your SSL automatically, but if you need to troubleshoot HTTPS or Firewall issues:
+
+**Check UFW (Firewall) status and open ports:**
+```bash
+ufw status verbose
+```
+
+**Force Caddy to reload (useful if you changed domains):**
+```bash
+systemctl reload caddy
+```
+
+## 7. File Transfers (Run these on your local PC!)
 If you need to move a specific file to or from the VPS, use `scp` in your local PowerShell or Terminal.
 
 **Upload a file to the VPS:**
@@ -94,4 +132,8 @@ scp C:\path\to\your\file.json root@<YOUR_VPS_IP>:/opt/quovex/
 **Download a file from the VPS:**
 ```bash
 scp root@<YOUR_VPS_IP>:/opt/quovex/some_log.txt C:\path\to\save\
-```
+```  
+
+// push to git from pc
+cd C:\Users\Testbook\Downloads\study\studytimer_backend
+git add setup_native.sh; git commit -m "Fix: always rm -rf and clone fresh to avoid useradd dir conflict"; git push origin main
