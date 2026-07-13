@@ -55,6 +55,17 @@ const SETTINGS_SECTIONS = [
       { key: 'auto_approve_threshold', label: 'Auto-approve Quality Score Threshold', type: 'number', value: '0', hint: '0 = all questions go to manual review (recommended)' },
     ],
   },
+  {
+    title: 'App Version',
+    icon: 'system_update',
+    fields: [
+      { key: 'app_latest_version', label: 'Latest Version', type: 'text', value: '1.0.0', hint: 'Newest version available' },
+      { key: 'app_min_version', label: 'Minimum Version', type: 'text', value: '1.0.0', hint: 'Users below this version are forced to update' },
+      { key: 'app_update_url', label: 'APK Download URL', type: 'text', value: 'https://api.quovex.online/downloads/app-release.apk' },
+      { key: 'app_force_update', label: 'Force Update', type: 'text', value: 'false', hint: 'Set to "true" to force all users to update' },
+      { key: 'app_release_notes', label: 'Release Notes', type: 'text', value: '', hint: 'What\'s new in this version (shown in update dialog)' },
+    ],
+  },
 ];
 
 export default function SettingsPage() {
