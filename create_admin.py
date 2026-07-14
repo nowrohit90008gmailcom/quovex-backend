@@ -32,31 +32,20 @@ if _env_path.exists():
 def _env(key: str, default: str = "") -> str:
     return os.environ.get(key) or _env_vars.get(key, default)
 
-ADMINS = [
-    {
-        "email": _env("ADMIN_EMAIL_1", "Rohit@Quovex.online"),
-        "password": _env("ADMIN_PASSWORD_1", "somehowimetyou"),
-        "role": "superadmin",
-    },
-    {
-        "email": _env("ADMIN_EMAIL_2", "Kartikey@Quovex.online"),
-        "password": _env("ADMIN_PASSWORD_2", "somehowyouleftme"),
-        "role": "superadmin",
-    },
-]
+_admin_email_1 = _env("ADMIN_EMAIL_1", "")
+_admin_email_2 = _env("ADMIN_EMAIL_2", "")
+_admin_pw_1 = _env("ADMIN_PASSWORD_1", "")
+_admin_pw_2 = _env("ADMIN_PASSWORD_2", "")
 
-_any_default = any(
-    a["password"] in ("somehowimetyou", "somehowyouleftme")
-    and not _env_vars.get("ADMIN_PASSWORD_1")
-    and not _env_vars.get("ADMIN_PASSWORD_2")
-    for a in ADMINS
-)
-if _any_default:
-    import logging
-    logging.warning(
-        "Using default admin passwords via env — set ADMIN_PASSWORD_1 / ADMIN_PASSWORD_2 "
-        "for production security"
-    )
+if not _admin_pw_1 or not _admin_pw_2:
+    print("ERROR: ADMIN_PASSWORD_1 and ADMIN_PASSWORD_2 must be set in .env")
+    print("Generate them with:  openssl rand -hex 18")
+    sys.exit(1)
+
+ADMINS = [
+    {"email": _admin_email_1, "password": _admin_pw_1, "role": "superadmin"},
+    {"email": _admin_email_2, "password": _admin_pw_2, "role": "superadmin"},
+]
 
 
 def get_engine():

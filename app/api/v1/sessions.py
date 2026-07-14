@@ -20,12 +20,31 @@ from app.services.points_service import (
     calculate_points, apply_ad_double, get_daily_verified_minutes
 )
 from app.services.badge_service import check_and_award_badges
+from app.services.notification_service import send_rank_change
+from app.services.leaderboard_service import get_user_rank
+
+
+def _notify_rank_changes(db, user, tracks):
+    for track in tracks:
+        rank_data = get_user_rank(db, user.id, track, "global", "month")
+        if not rank_data:
+            continue
+        new_rank = rank_data["rank"]
+        last_ranks = user.last_known_ranks or {}
+        old_rank = last_ranks.get(track)
+        if old_rank is not None and old_rank != new_rank:
+            send_rank_change(db, user, old_rank, new_rank, track)
+        last_ranks[track] = new_rank
+        user.last_known_ranks = last_ranks
+    db.commit()
+
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
-SOCIAL_UNLOCK_PER_HOUR = 15          # minutes unlocked per verified study hour
-SOCIAL_UNLOCK_AD_BONUS = 5           # minutes from ad
-SOCIAL_UNLOCK_AD_COOLDOWN_HRS = 2    # hours between ads
+from app.config import settings as app_config
+SOCIAL_UNLOCK_PER_HOUR = app_config.SOCIAL_UNLOCK_MINUTES_PER_HOUR
+SOCIAL_UNLOCK_AD_BONUS = app_config.SOCIAL_UNLOCK_AD_BONUS_MINUTES
+SOCIAL_UNLOCK_AD_COOLDOWN_HRS = app_config.SOCIAL_UNLOCK_AD_COOLDOWN_HOURS
 
 
 @router.post("/start", response_model=SessionStartOut)
@@ -177,13 +196,16 @@ async def end_session(
                 pass
 
     # Ad double availability
-    ad_doubles_available = current_user.ad_doubles_used_today < 2
+    ad_doubles_available = current_user.ad_doubles_used_today < app_config.MAX_DAILY_AD_DOUBLES
 
     db.commit()
     db.refresh(session)
     db.refresh(current_user)
 
     new_badges = check_and_award_badges(current_user, db)
+
+    if verified_minutes > 0:
+        _notify_rank_changes(db, current_user, ["study", "overall"])
 
     return SessionEndOut(
         session_id=session.id,
@@ -244,8 +266,8 @@ async def ad_extend_session(
     )
     if not session:
         raise HTTPException(status_code=400, detail="No active session to extend")
-    EXTRA_MINUTES = 15
-    EXTRA_POINTS = 25
+    EXTRA_MINUTES = app_config.AD_EXTEND_MINUTES
+    EXTRA_POINTS = app_config.AD_EXTEND_POINTS
     session.verified_minutes += EXTRA_MINUTES
     session.points_awarded += EXTRA_POINTS
     session.points_base += EXTRA_POINTS
@@ -258,6 +280,30 @@ async def ad_extend_session(
         "extra_points": EXTRA_POINTS,
         "verified_minutes_total": session.verified_minutes,
         "message": f"Session extended by {EXTRA_MINUTES} minutes!",
+    }
+
+
+@router.post("/ad-continue")
+async def ad_continue_session(
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Allow user to continue an active session after watching a rewarded ad on honor check."""
+    session = (
+        db.query(StudySession)
+        .filter(
+            StudySession.user_id == current_user.id,
+            StudySession.is_active == True,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=400, detail="No active session to continue")
+    session.honor_check_failures = 0
+    db.commit()
+    return {
+        "status": "ok",
+        "message": "Session continued \u2014 honor check failures reset",
     }
 
 

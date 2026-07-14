@@ -16,10 +16,10 @@ from app.models import (
 
 logger = logging.getLogger(__name__)
 
-SPEED_BONUS_THRESHOLD_MS = 10000
-BASE_POINTS_PER_CORRECT = 10
-SPEED_BONUS = 3
-STREAK_BONUS = 2
+SPEED_BONUS_THRESHOLD_MS = settings.QUIZ_SPEED_BONUS_THRESHOLD_MS
+BASE_POINTS_PER_CORRECT = settings.QUIZ_BASE_POINTS_PER_CORRECT
+SPEED_BONUS = settings.QUIZ_SPEED_BONUS_POINTS
+STREAK_BONUS = settings.QUIZ_STREAK_BONUS_POINTS
 
 
 def select_questions(
@@ -29,6 +29,7 @@ def select_questions(
     exam_tag: Optional[str],
     difficulty: Optional[str],
     count: Optional[int] = None,
+    grade_or_tag: Optional[str] = None,
 ) -> List[QuizQuestion]:
     """Adaptive question selection (PRD §5.4)."""
     count = count or settings.QUIZ_SET_SIZE
@@ -49,6 +50,10 @@ def select_questions(
         query = query.filter(QuizQuestion.subject == subject)
     if exam_tag:
         query = query.filter(QuizQuestion.exam_tag == exam_tag)
+    if grade_or_tag:
+        query = query.filter(
+            (QuizQuestion.grade_or_tag == grade_or_tag) | (QuizQuestion.exam_tag == grade_or_tag)
+        )
 
     if difficulty == Difficulty.adaptive and subject:
         prof = (

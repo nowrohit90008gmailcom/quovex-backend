@@ -42,8 +42,8 @@ def calculate_points(verified_minutes: int, daily_verified_minutes_so_far: int) 
         else:
             # Diminishing returns: exponential decay after threshold
             over = minute_index - diminish_after
-            decay_factor = math.exp(-over / 120)  # half-life ~83 minutes
-            rate = (base_rate / 60) * max(0.1, decay_factor)
+            decay_factor = math.exp(-over / settings.POINTS_DECAY_HALF_LIFE_MINUTES)
+            rate = (base_rate / 60) * max(settings.POINTS_MIN_DECAY_FACTOR, decay_factor)
 
         total_points += rate * chunk
         accumulated += chunk
@@ -66,7 +66,7 @@ def apply_ad_double(user: User, session: StudySession, db: Session) -> Tuple[int
         user.ad_doubles_used_today = 0
         user.ad_doubles_reset_at = now
 
-    MAX_DAILY_DOUBLES = 2
+    MAX_DAILY_DOUBLES = settings.MAX_DAILY_AD_DOUBLES
     if user.ad_doubles_used_today >= MAX_DAILY_DOUBLES:
         return session.points_awarded, False
 

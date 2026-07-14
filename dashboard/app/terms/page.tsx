@@ -19,10 +19,10 @@ export default function TermsPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">1. Acceptance of Terms</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            Welcome to StudyTimer. By downloading, accessing, or using the StudyTimer mobile application, website, or any related services (collectively, the &ldquo;Service&rdquo;), you agree to be bound by these Terms of Service (the &ldquo;Terms&rdquo;). If you do not agree to all of the terms and conditions set forth herein, you must not access or use the Service in any manner.
+            Welcome to Quovex. By downloading, accessing, or using the Quovex mobile application, website, or any related services (collectively, the &ldquo;Service&rdquo;), you agree to be bound by these Terms of Service (the &ldquo;Terms&rdquo;). If you do not agree to all of the terms and conditions set forth herein, you must not access or use the Service in any manner.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            These Terms constitute a legally binding agreement between you (&ldquo;User&rdquo; or &ldquo;you&rdquo;) and StudyTimer Inc. (&ldquo;Company,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;). By creating an account, completing a study session, or otherwise interacting with the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms, our Privacy Policy, and any other policies referenced herein.
+            These Terms constitute a legally binding agreement between you (&ldquo;User&rdquo; or &ldquo;you&rdquo;) and Quovex Inc. (&ldquo;Company,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;). By creating an account, completing a study session, or otherwise interacting with the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms, our Privacy Policy, and any other policies referenced herein.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             You represent and warrant that you are at least thirteen (13) years of age. If you are under the age of majority in your jurisdiction of residence but at least thirteen (13) years of age, you represent and warrant that a parent or legal guardian has reviewed and agreed to these Terms on your behalf. The Service is not intended for children under thirteen (13) years of age, and we do not knowingly collect personal information from such individuals.
@@ -36,7 +36,7 @@ export default function TermsPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">2. Description of Service</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            StudyTimer is a comprehensive productivity and exam preparation application designed to help students and professionals optimize their study habits, track their progress, and achieve their academic goals. The Service provides a suite of integrated tools and features, including but not limited to:
+            Quovex is a comprehensive productivity and exam preparation application designed to help students and professionals optimize their study habits, track their progress, and achieve their academic goals. The Service provides a suite of integrated tools and features, including but not limited to:
           </p>
           <ul className="list-disc text-[14px] text-[#444653] mb-4 ml-4 space-y-1.5">
             <li className="mb-2"><strong>Timer and Study Sessions:</strong> Customizable countdown and count-up timers supporting focus, exam, pomodoro, and custom modes with automatic session logging and verification mechanisms.</li>
@@ -85,8 +85,8 @@ export default function TermsPage() {
             <li className="mb-2"><strong>Cheating and Manipulation:</strong> Manipulating, inflating, or fabricating study time, session duration, or any activity metrics through any means, including but not limited to: running fake or idle study sessions, using automated scripts, bots, or macros to simulate user activity, tampering with device clock or time zone settings to extend session duration artificially, or using GPS spoofing or location manipulation tools to falsify location-based verification.</li>
             <li className="mb-2"><strong>Multiple Accounts and Account Sharing:</strong> Creating or using more than one account per natural person; sharing your account credentials with any other person; allowing any third party to access or use your account; or using another user&rsquo;s account without authorization.</li>
             <li className="mb-2"><strong>Referral and Reward Fraud:</strong> Abusing the referral program by creating fake or duplicate accounts for the purpose of earning referral credits; referring yourself through multiple email addresses or identities; claiming rewards through fraudulent or misleading means; or any other manipulation of the reward or referral systems.</li>
-            <li className="mb-2"><strong>Harassment and Abuse:</strong> Harassing, threatening, bullying, intimidating, stalking, or otherwise behaving abusively toward any other user, employee, or representative of StudyTimer; sending unsolicited or unauthorized advertising, promotional materials, or spam.</li>
-            <li className="mb-2"><strong>Impersonation:</strong> Impersonating or misrepresenting your affiliation with any person or entity, including but not limited to StudyTimer employees, moderators, or administrators; using a false identity or alias for the purpose of deceiving others.</li>
+            <li className="mb-2"><strong>Harassment and Abuse:</strong> Harassing, threatening, bullying, intimidating, stalking, or otherwise behaving abusively toward any other user, employee, or representative of Quovex; sending unsolicited or unauthorized advertising, promotional materials, or spam.</li>
+            <li className="mb-2"><strong>Impersonation:</strong> Impersonating or misrepresenting your affiliation with any person or entity, including but not limited to Quovex employees, moderators, or administrators; using a false identity or alias for the purpose of deceiving others.</li>
             <li className="mb-2"><strong>Inappropriate Content:</strong> Posting, uploading, sharing, or transmitting any content that is unlawful, defamatory, obscene, pornographic, hateful, discriminatory, or otherwise objectionable; content that infringes upon the rights of any third party, including intellectual property rights and privacy rights.</li>
             <li className="mb-2"><strong>Reverse Engineering:</strong> Reverse engineering, decompiling, disassembling, decrypting, or otherwise attempting to derive the source code, underlying algorithms, or structure of the Service or any component thereof; circumventing, disabling, or tampering with any security-related features, anti-cheat mechanisms, or content protection systems.</li>
             <li className="mb-2"><strong>Intellectual Property Infringement:</strong> Reproducing, distributing, modifying, creating derivative works of, publicly displaying, or otherwise exploiting any content from the Service without our prior written consent, except as expressly permitted under these Terms.</li>
@@ -102,7 +102,7 @@ export default function TermsPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">5. Anti-Cheat System</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            StudyTimer employs an automated anti-cheat system designed to detect and deter fraudulent activity, protect the integrity of the leaderboards and reward systems, and ensure a fair and equitable experience for all users. By using the Service, you acknowledge and consent to the operation of this system as described herein.
+            Quovex employs an automated anti-cheat system designed to detect and deter fraudulent activity, protect the integrity of the leaderboards and reward systems, and ensure a fair and equitable experience for all users. By using the Service, you acknowledge and consent to the operation of this system as described herein.
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">5.1 Honor Checks</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -114,14 +114,14 @@ export default function TermsPage() {
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">5.3 Manual Review</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            Flagged accounts and sessions are subject to manual review by StudyTimer personnel. During manual review, we may examine session logs, device metadata, interaction patterns, honor check responses, and any other data reasonably relevant to determining compliance with these Terms. We reserve the right to request additional information or documentation from you to assist in our review, and your failure to provide such information within a reasonable timeframe may result in adverse action against your account.
+            Flagged accounts and sessions are subject to manual review by Quovex personnel. During manual review, we may examine session logs, device metadata, interaction patterns, honor check responses, and any other data reasonably relevant to determining compliance with these Terms. We reserve the right to request additional information or documentation from you to assist in our review, and your failure to provide such information within a reasonable timeframe may result in adverse action against your account.
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">5.4 Consequences and Appeals</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             Upon a determination that a violation of these Terms has occurred, we may take one or more of the following actions at our sole discretion: (a) flagging the account or session in our system; (b) deducting some or all points earned during suspicious sessions; (c) imposing a temporary suspension of account privileges for a specified period; (d) permanently banning the account from the Service; and (e) forfeiting any accumulated rewards, points, or referral credits.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
-            If you believe that an action has been taken against your account in error, you may submit an appeal by contacting our support team at <strong>support@studytimer.com</strong>. Your appeal must include your account identifier, a detailed explanation of the facts supporting your appeal, and any relevant evidence. We will review your appeal and respond within a reasonable timeframe. Please note that submission of an appeal does not guarantee a favorable outcome, and all decisions regarding appeals are final and binding in our sole discretion.
+            If you believe that an action has been taken against your account in error, you may submit an appeal by contacting our support team at <strong>supportquovex@gmail.com</strong>. Your appeal must include your account identifier, a detailed explanation of the facts supporting your appeal, and any relevant evidence. We will review your appeal and respond within a reasonable timeframe. Please note that submission of an appeal does not guarantee a favorable outcome, and all decisions regarding appeals are final and binding in our sole discretion.
           </p>
         </div>
 
@@ -130,7 +130,7 @@ export default function TermsPage() {
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">6. Rewards and Referral Program</h2>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-0 mb-2">6.1 General</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            StudyTimer may, from time to time, offer users the opportunity to earn points, credits, rewards, or other benefits through study activity, referrals, competitions, promotions, and other mechanisms. All rewards offered through the Service are promotional in nature and do not constitute monetary value, legal currency, or financial instruments. Rewards have no cash equivalent and may not be redeemed for cash, except as expressly provided in a specific promotion.
+            Quovex may, from time to time, offer users the opportunity to earn points, credits, rewards, or other benefits through study activity, referrals, competitions, promotions, and other mechanisms. All rewards offered through the Service are promotional in nature and do not constitute monetary value, legal currency, or financial instruments. Rewards have no cash equivalent and may not be redeemed for cash, except as expressly provided in a specific promotion.
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">6.2 Eligibility and Verification</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -142,7 +142,7 @@ export default function TermsPage() {
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">6.4 Referral Program</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            The StudyTimer referral program allows existing users (&ldquo;Referrers&rdquo;) to earn referral credits by inviting new users (&ldquo;Referees&rdquo;) to join the Service. For each new user who registers using a valid referral link or code and who is not an existing user, the following credit structure applies: (a) the Referee will receive one hundred (100) points upon successful registration and completion of their first study session; and (b) the Referrer will receive fifty (50) points upon the Referee&rsquo;s completion of their first verified study session. Referral credits are subject to verification and may be withheld or reversed if: the Referee&rsquo;s account is flagged for suspicious activity, the Referee is determined to be a duplicate or fake account, or the referral was obtained through prohibited means. Referral credits are non-transferable and have no cash value.
+            The Quovex referral program allows existing users (&ldquo;Referrers&rdquo;) to earn referral credits by inviting new users (&ldquo;Referees&rdquo;) to join the Service. For each new user who registers using a valid referral link or code and who is not an existing user, the following credit structure applies: (a) the Referee will receive one hundred (100) points upon successful registration and completion of their first study session; and (b) the Referrer will receive fifty (50) points upon the Referee&rsquo;s completion of their first verified study session. Referral credits are subject to verification and may be withheld or reversed if: the Referee&rsquo;s account is flagged for suspicious activity, the Referee is determined to be a duplicate or fake account, or the referral was obtained through prohibited means. Referral credits are non-transferable and have no cash value.
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">6.5 Fraud and Abuse</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -178,7 +178,7 @@ export default function TermsPage() {
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">7.5 Disclaimer</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
-            The App Lock feature is provided as a voluntary productivity tool. StudyTimer makes no representations or warranties regarding the effectiveness of the App Lock feature in improving study habits, academic performance, or productivity outcomes. You acknowledge that you are solely responsible for your own study practices and academic results, and that the App Lock feature is not a substitute for personal discipline, time management, or professional academic guidance. StudyTimer shall not be liable for any loss, damage, or negative outcome arising from your use or inability to use the App Lock feature.
+            The App Lock feature is provided as a voluntary productivity tool. Quovex makes no representations or warranties regarding the effectiveness of the App Lock feature in improving study habits, academic performance, or productivity outcomes. You acknowledge that you are solely responsible for your own study practices and academic results, and that the App Lock feature is not a substitute for personal discipline, time management, or professional academic guidance. Quovex shall not be liable for any loss, damage, or negative outcome arising from your use or inability to use the App Lock feature.
           </p>
         </div>
 
@@ -187,11 +187,11 @@ export default function TermsPage() {
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">8. Intellectual Property</h2>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-0 mb-2">8.1 Ownership</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            The Service, including but not limited to the StudyTimer application, website, software code, design elements, graphics, user interface, audiovisual content, algorithms, data models, documentation, and all other materials (collectively, the &ldquo;StudyTimer Content&rdquo;), is owned by StudyTimer Inc. or its licensors and is protected by copyright, trademark, patent, trade secret, and other intellectual property laws. The StudyTimer name, logo, and all related names, logos, product and service names, designs, and slogans are trademarks of StudyTimer Inc. or its affiliates. You may not use such marks without our prior written permission.
+            The Service, including but not limited to the Quovex application, website, software code, design elements, graphics, user interface, audiovisual content, algorithms, data models, documentation, and all other materials (collectively, the &ldquo;Quovex Content&rdquo;), is owned by Quovex Inc. or its licensors and is protected by copyright, trademark, patent, trade secret, and other intellectual property laws. The Quovex name, logo, and all related names, logos, product and service names, designs, and slogans are trademarks of Quovex Inc. or its affiliates. You may not use such marks without our prior written permission.
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">8.2 License to Use</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            Subject to your compliance with these Terms, we grant you a limited, non-exclusive, non-transferable, non-sublicensable, revocable license to download, install, and use the StudyTimer mobile application on a device that you own or control, and to access and use the Service solely for your personal, non-commercial purposes. All rights not expressly granted to you under these Terms are reserved by StudyTimer Inc. and its licensors.
+            Subject to your compliance with these Terms, we grant you a limited, non-exclusive, non-transferable, non-sublicensable, revocable license to download, install, and use the Quovex mobile application on a device that you own or control, and to access and use the Service solely for your personal, non-commercial purposes. All rights not expressly granted to you under these Terms are reserved by Quovex Inc. and its licensors.
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">8.3 User Content</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -221,7 +221,7 @@ export default function TermsPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">10. Disclaimer of Warranties</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            THE SERVICE IS PROVIDED ON AN &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; BASIS, WITHOUT ANY WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE. TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, STUDYTIMER INC., ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AND LICENSORS DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, QUIET ENJOYMENT, ACCURACY, AND NON-INFRINGEMENT.
+            THE SERVICE IS PROVIDED ON AN &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo; BASIS, WITHOUT ANY WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE. TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, QUOVEX INC., ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AND LICENSORS DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, QUIET ENJOYMENT, ACCURACY, AND NON-INFRINGEMENT.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             WE DO NOT WARRANT THAT: (a) THE SERVICE WILL MEET YOUR SPECIFIC REQUIREMENTS OR EXPECTATIONS; (b) THE SERVICE WILL BE UNINTERRUPTED, TIMELY, SECURE, ERROR-FREE, OR FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS; (c) THE RESULTS OBTAINED FROM THE USE OF THE SERVICE WILL BE ACCURATE, RELIABLE, OR SUITABLE FOR ANY PARTICULAR PURPOSE; (d) THE QUALITY OF ANY PRODUCTS, SERVICES, INFORMATION, OR OTHER MATERIALS PURCHASED OR OBTAINED BY YOU THROUGH THE SERVICE WILL MEET YOUR EXPECTATIONS; OR (e) ANY ERRORS OR DEFECTS IN THE SERVICE WILL BE CORRECTED.
@@ -238,10 +238,10 @@ export default function TermsPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">11. Limitation of Liability</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL STUDYTIMER INC., ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, OR LICENSORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA, OR OTHER INTANGIBLE LOSSES (EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES), ARISING OUT OF OR RELATING TO: (a) YOUR USE OR INABILITY TO USE THE SERVICE; (b) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE SERVICE; (c) ANY CONTENT OBTAINED FROM THE SERVICE; (d) UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT; OR (e) ANY OTHER MATTER RELATING TO THE SERVICE.
+            TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL QUOVEX INC., ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, OR LICENSORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, DATA, OR OTHER INTANGIBLE LOSSES (EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES), ARISING OUT OF OR RELATING TO: (a) YOUR USE OR INABILITY TO USE THE SERVICE; (b) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE SERVICE; (c) ANY CONTENT OBTAINED FROM THE SERVICE; (d) UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT; OR (e) ANY OTHER MATTER RELATING TO THE SERVICE.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            IN NO EVENT SHALL THE AGGREGATE LIABILITY OF STUDYTIMER INC. FOR ALL CLAIMS ARISING OUT OF OR RELATING TO THESE TERMS OR THE SERVICE EXCEED THE TOTAL AMOUNT OF FEES ACTUALLY PAID BY YOU TO STUDYTIMER INC. FOR THE USE OF THE SERVICE DURING THE TWELVE (12) MONTHS IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM. IF YOU HAVE NOT PAID ANY FEES TO US DURING SUCH PERIOD, YOUR SOLE AND EXCLUSIVE REMEDY SHALL BE TO DISCONTINUE USING THE SERVICE.
+            IN NO EVENT SHALL THE AGGREGATE LIABILITY OF QUOVEX INC. FOR ALL CLAIMS ARISING OUT OF OR RELATING TO THESE TERMS OR THE SERVICE EXCEED THE TOTAL AMOUNT OF FEES ACTUALLY PAID BY YOU TO QUOVEX INC. FOR THE USE OF THE SERVICE DURING THE TWELVE (12) MONTHS IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM. IF YOU HAVE NOT PAID ANY FEES TO US DURING SUCH PERIOD, YOUR SOLE AND EXCLUSIVE REMEDY SHALL BE TO DISCONTINUE USING THE SERVICE.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
             NOTHING IN THESE TERMS SHALL EXCLUDE OR LIMIT OUR LIABILITY FOR: (a) DEATH OR PERSONAL INJURY CAUSED BY OUR NEGLIGENCE; (b) FRAUD OR FRAUDULENT MISREPRESENTATION; OR (c) ANY OTHER LIABILITY THAT CANNOT BE EXCLUDED OR LIMITED UNDER APPLICABLE LAW. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF CERTAIN DAMAGES, SO SOME OF THE ABOVE EXCLUSIONS AND LIMITATIONS MAY NOT APPLY TO YOU.
@@ -252,7 +252,7 @@ export default function TermsPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">12. Indemnification</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            You agree to defend, indemnify, and hold harmless StudyTimer Inc., its affiliates, officers, directors, employees, agents, and licensors from and against any and all claims, demands, actions, liabilities, losses, damages, judgments, settlements, costs, and expenses (including reasonable attorneys&rsquo; fees and court costs) arising out of or relating to: (a) your breach of any provision of these Terms; (b) your violation of any applicable law, regulation, or ordinance; (c) your infringement of any intellectual property rights, privacy rights, or other legal rights of any third party; (d) your User Content; (e) your use of the Service in a manner that violates these Terms; or (f) any fraudulent, negligent, or willfully wrongful act or omission by you.
+            You agree to defend, indemnify, and hold harmless Quovex Inc., its affiliates, officers, directors, employees, agents, and licensors from and against any and all claims, demands, actions, liabilities, losses, damages, judgments, settlements, costs, and expenses (including reasonable attorneys&rsquo; fees and court costs) arising out of or relating to: (a) your breach of any provision of these Terms; (b) your violation of any applicable law, regulation, or ordinance; (c) your infringement of any intellectual property rights, privacy rights, or other legal rights of any third party; (d) your User Content; (e) your use of the Service in a manner that violates these Terms; or (f) any fraudulent, negligent, or willfully wrongful act or omission by you.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
             We reserve the right, at our own expense, to assume the exclusive defense and control of any matter otherwise subject to indemnification by you, in which event you agree to cooperate with us in asserting any available defenses. You may not settle any claim subject to indemnification without our prior written consent.
@@ -264,9 +264,9 @@ export default function TermsPage() {
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">13. Termination</h2>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-0 mb-2">13.1 Termination by You</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            You may terminate your account and cease using the Service at any time and for any reason by deleting your account through the account settings within the application or by contacting our support team at <strong>support@studytimer.com</strong>. Upon such termination, your right to access and use the Service will immediately cease.
+            You may terminate your account and cease using the Service at any time and for any reason by deleting your account through the account settings within the application or by contacting our support team at <strong>supportquovex@gmail.com</strong>. Upon such termination, your right to access and use the Service will immediately cease.
           </p>
-          <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">13.2 Termination by StudyTimer</h3>
+          <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">13.2 Termination by Quovex</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             We reserve the right, in our sole discretion and without prior notice, to terminate or suspend your account and access to the Service for any reason, including but not limited to: (a) breach of any provision of these Terms; (b) engagement in fraudulent, abusive, or illegal activity; (c) extended period of account inactivity (defined as no login or session activity for a continuous period of twelve (12) months or more); (d) failure to pay any fees owed in connection with premium features; or (e) compliance with legal requirements or requests from law enforcement or governmental authorities.
           </p>
@@ -284,7 +284,7 @@ export default function TermsPage() {
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">14. Dispute Resolution</h2>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-0 mb-2">14.1 Informal Resolution</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            Before initiating any formal dispute resolution proceeding, you agree to first contact us at <strong>support@studytimer.com</strong> and provide a written description of the dispute, including all relevant details and supporting documentation. We will review your notice and respond within thirty (30) days. If the dispute cannot be resolved informally within sixty (60) days of your initial notice, either party may pursue formal dispute resolution as provided below. You agree that this informal dispute resolution process is a condition precedent to initiating any arbitration or legal proceeding against StudyTimer.
+            Before initiating any formal dispute resolution proceeding, you agree to first contact us at <strong>supportquovex@gmail.com</strong> and provide a written description of the dispute, including all relevant details and supporting documentation. We will review your notice and respond within thirty (30) days. If the dispute cannot be resolved informally within sixty (60) days of your initial notice, either party may pursue formal dispute resolution as provided below. You agree that this informal dispute resolution process is a condition precedent to initiating any arbitration or legal proceeding against Quovex.
           </p>
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">14.2 Mandatory Arbitration</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -327,13 +327,13 @@ export default function TermsPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">17. Entire Agreement</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            These Terms, together with our Privacy Policy and any other documents expressly incorporated by reference herein, constitute the entire and exclusive agreement between you and StudyTimer Inc. regarding your use of the Service and supersede all prior and contemporaneous understandings, agreements, representations, and warranties, whether written or oral, relating to the subject matter hereof.
+            These Terms, together with our Privacy Policy and any other documents expressly incorporated by reference herein, constitute the entire and exclusive agreement between you and Quovex Inc. regarding your use of the Service and supersede all prior and contemporaneous understandings, agreements, representations, and warranties, whether written or oral, relating to the subject matter hereof.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             No failure or delay by us in exercising any right, power, or privilege under these Terms shall operate as a waiver thereof, nor shall any single or partial exercise thereof preclude any other or further exercise thereof or the exercise of any other right, power, or privilege. The waiver of any breach of any provision of these Terms shall not be deemed a waiver of any subsequent breach of the same or any other provision.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
-            These Terms do not create a partnership, joint venture, agency, fiduciary, or employment relationship between you and StudyTimer Inc. You may not assign, delegate, or transfer these Terms or any of your rights or obligations hereunder, by operation of law or otherwise, without our prior written consent. Any purported assignment in violation of this provision shall be null and void. We may freely assign or delegate these Terms or any of our rights and obligations hereunder without your consent. These Terms shall be binding upon and inure to the benefit of the parties and their respective permitted successors and assigns.
+            These Terms do not create a partnership, joint venture, agency, fiduciary, or employment relationship between you and Quovex Inc. You may not assign, delegate, or transfer these Terms or any of your rights or obligations hereunder, by operation of law or otherwise, without our prior written consent. Any purported assignment in violation of this provision shall be null and void. We may freely assign or delegate these Terms or any of our rights and obligations hereunder without your consent. These Terms shall be binding upon and inure to the benefit of the parties and their respective permitted successors and assigns.
           </p>
         </div>
 
@@ -358,12 +358,12 @@ export default function TermsPage() {
             If you have any questions, concerns, or comments regarding these Terms or the Service, you may contact us using the following information:
           </p>
           <div className="text-[14px] leading-[24px] text-[#444653] mb-4 space-y-2">
-            <p><strong>Email:</strong> support@studytimer.com</p>
-            <p><strong>Physical Address:</strong> StudyTimer Inc., 123 Innovation Drive, Suite 400, New York, NY 10001, United States of America</p>
+            <p><strong>Email:</strong> supportquovex@gmail.com</p>
+            <p><strong>Physical Address:</strong> Quovex Inc., 123 Innovation Drive, Suite 400, New York, NY 10001, United States of America</p>
             <p><strong>Response Time:</strong> We aim to respond to all inquiries within fifteen (15) business days of receipt. During periods of high volume, response times may be extended.</p>
           </div>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
-            For legal notices or service of process, please direct all correspondence to the physical address listed above, marked &ldquo;Attention: Legal Department.&rdquo; Legal notices may also be sent via email to <strong>legal@studytimer.com</strong>, provided that a physical copy is also sent to the physical address listed above.
+            For legal notices or service of process, please direct all correspondence to the physical address listed above, marked &ldquo;Attention: Legal Department.&rdquo; Legal notices may also be sent via email to <strong>supportquovex@gmail.com</strong>, provided that a physical copy is also sent to the physical address listed above.
           </p>
         </div>
       </div>

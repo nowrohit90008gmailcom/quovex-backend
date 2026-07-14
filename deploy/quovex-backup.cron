@@ -1,0 +1,3 @@
+# Quovex database backup — runs daily at 3:00 AM UTC
+# Installed by setup_native.sh
+0 3 * * * quovex /opt/quovex/deploy/backup.sh

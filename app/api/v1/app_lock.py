@@ -11,6 +11,7 @@ from app.schemas import (
     AppLockStatusOut, AppLockUpdateIn,
     AppLockConsumeIn, AppLockConsumeOut,
     AppLockAdUnlockOut, AppLockCreditsOut,
+    DailyTargetUpdateIn,
 )
 from app.config import settings
 
@@ -106,6 +107,21 @@ async def app_lock_ad_unlock(
         success=True,
         message="5 unlock credits added!",
     )
+
+
+@router.put("/daily-target", response_model=dict)
+async def set_daily_study_target(
+    body: DailyTargetUpdateIn,
+    current_user: User = Depends(get_current_user),
+    db: DBSession = Depends(get_db),
+):
+    """Set the user's daily study target (in minutes)."""
+    if body.daily_study_target_minutes < 1 or body.daily_study_target_minutes > 1440:
+        raise HTTPException(status_code=400, detail="Target must be between 1 and 1440 minutes")
+    current_user.daily_study_target_minutes = body.daily_study_target_minutes
+    db.commit()
+    db.refresh(current_user)
+    return {"status": "ok", "daily_study_target_minutes": current_user.daily_study_target_minutes}
 
 
 @router.get("/credits", response_model=AppLockCreditsOut)

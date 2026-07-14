@@ -3,13 +3,14 @@ and admin dashboard login via email + password (JWT)."""
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 
 from fastapi import Request
 
-from app.core.security import get_current_user, verify_firebase_token, get_or_create_user
+from app.core.security import get_current_user, get_current_admin, verify_firebase_token, get_or_create_user
 from app.core.jwt import create_access_token
 from app.core.constants import SUPPORTED_COUNTRIES, get_filtered_tags
 from app.db.session import get_db
@@ -44,14 +45,18 @@ async def admin_login(body: AdminLoginIn, request: Request, db: Session = Depend
     Only works for users with an admin_role set.
     """
     import bcrypt
-    import os
 
     user = db.query(User).filter(func.lower(User.email) == func.lower(body.email)).first()
 
-    # Dev mode shortcut: allow login with password "dev" if no password set
-    dev_mode = os.environ.get("ENVIRONMENT", "development") == "development"
-
-    if not user:
+    if not user or not user.password_hash:
+        from app.models import AdminActionLog
+        log = AdminActionLog(
+            admin_id=None, action="admin_login_failed",
+            target_type="admin", target_id=None,
+            details=f"Failed login attempt for email: {body.email}",
+        )
+        db.add(log)
+        db.commit()
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
     if user.admin_role is None:
@@ -60,25 +65,71 @@ async def admin_login(body: AdminLoginIn, request: Request, db: Session = Depend
     if user.is_banned:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is suspended")
 
-    # Verify password
-    if user.password_hash:
-        if not bcrypt.checkpw(body.password.encode(), user.password_hash.encode()):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
-    elif dev_mode and body.password == "dev":
-        # Dev mode: no password set yet, accept "dev" as password
-        pass
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No password set for this admin account. Contact the system administrator."
-        )
+    if not bcrypt.checkpw(body.password.encode(), user.password_hash.encode()):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
     token = create_access_token(str(user.id), extra_claims={"role": user.admin_role.value if user.admin_role else None})
 
-    return AdminLoginOut(
-        access_token=token,
-        user=UserProfileOut.model_validate(user),
+    response = JSONResponse(
+        content=AdminLoginOut(
+            access_token=token,
+            user=UserProfileOut.model_validate(user),
+        ).model_dump(),
     )
+    response.set_cookie(
+        key="admin_token",
+        value=token,
+        max_age=28800,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+    )
+    return response
+
+
+# ─── Admin Change Password ─────────────────────────────────────────────────────
+
+class AdminChangePasswordIn(BaseModel):
+    current_password: str
+    new_password: str
+
+class AdminChangePasswordOut(BaseModel):
+    success: bool
+    message: str = "Password changed successfully"
+
+
+@router.post("/admin-change-password", response_model=AdminChangePasswordOut)
+async def admin_change_password(
+    body: AdminChangePasswordIn,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """Change the authenticated admin user's password."""
+    import bcrypt
+
+    if not current_user.password_hash:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No password set for this account")
+
+    if not bcrypt.checkpw(body.current_password.encode(), current_user.password_hash.encode()):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect")
+
+    if len(body.new_password) < 8:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password must be at least 8 characters")
+
+    current_user.password_hash = bcrypt.hashpw(body.new_password.encode(), bcrypt.gensalt()).decode()
+    db.commit()
+
+    from app.models import AdminActionLog
+    log = AdminActionLog(
+        admin_id=current_user.id, action="admin_password_changed",
+        target_type="admin", target_id=str(current_user.id),
+        details="Admin password changed successfully",
+    )
+    db.add(log)
+    db.commit()
+
+    return AdminChangePasswordOut(success=True)
 
 
 # ─── Email OTP Login ──────────────────────────────────────────────────────────
@@ -89,7 +140,6 @@ class SendOtpIn(BaseModel):
 class SendOtpOut(BaseModel):
     success: bool
     message: str
-    otp: Optional[str] = None  # only returned in development mode
 
 class VerifyOtpIn(BaseModel):
     email: EmailStr
@@ -107,12 +157,10 @@ class VerifyOtpOut(BaseModel):
 async def send_otp(body: SendOtpIn, request: Request, db: Session = Depends(get_db)):
     """Generate and send a 6-digit OTP to the given email."""
     otp = generate_otp(body.email, db=db, ip_address=request.client.host if request.client else None)
-    sent = send_otp_email(body.email, otp)
-    from app.config import settings
+    send_otp_email(body.email, otp)
     return SendOtpOut(
-        success=sent,
-        message="OTP sent to email" if sent else "Failed to send OTP",
-        otp=otp if settings.ENVIRONMENT == "development" else None,
+        success=True,
+        message="OTP sent to email",
     )
 
 

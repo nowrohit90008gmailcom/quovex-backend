@@ -200,6 +200,10 @@ class AppLockCreditsOut(BaseModel):
     message: str
 
 
+class DailyTargetUpdateIn(BaseModel):
+    daily_study_target_minutes: int
+
+
 # ─── Sessions ──────────────────────────────────────────────────────────────────
 
 class SessionStartIn(BaseModel):
@@ -310,6 +314,7 @@ class SocialUnlockAdOut(BaseModel):
 class QuizStartIn(BaseModel):
     subject: str
     exam_tag: Optional[str] = None
+    grade_or_tag: Optional[str] = None
     topic_id: Optional[UUID] = None
     difficulty: Optional[str] = "adaptive"
     question_count: Optional[int] = None
@@ -324,12 +329,14 @@ class QuizQuestionOut(BaseModel):
     question_type: str
     subject: str
     exam_tag: Optional[str] = None
+    grade_or_tag: Optional[str] = None
     difficulty: str
 
 
 class QuizStartOut(BaseModel):
     quiz_session_id: UUID
     questions: list[QuizQuestionOut]
+    grade_or_tag: Optional[str] = None
     started_at: datetime
 
 
@@ -354,6 +361,7 @@ class QuizCompleteOut(BaseModel):
     accuracy_percent: float
     points_earned: int
     verified_quiz_score_earned: int
+    grade_or_tag: Optional[str] = None
     ad_double_available: bool
     bonus_questions_available: bool
     message: str
@@ -563,6 +571,7 @@ class QuizQuestionAdminOut(BaseModel):
     question_type: str
     subject: str
     exam_tag: Optional[str] = None
+    grade_or_tag: Optional[str] = None
     difficulty: str
     status: str
     numerical_tolerance: Optional[float] = None
@@ -728,3 +737,27 @@ class AdminReportOut(BaseModel):
     summary: str
     generated_at: datetime
     read_at: Optional[datetime] = None
+
+
+# ─── Grade Subjects (class-wise subject selection) ─────────────────────────────
+
+class GradeSubjectCreateIn(BaseModel):
+    grade_or_tag: str
+    subject_name: str
+    display_order: int = 0
+
+
+class GradeSubjectUpdateIn(BaseModel):
+    subject_name: Optional[str] = None
+    display_order: Optional[int] = None
+
+
+class GradeSubjectOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    grade_or_tag: str
+    subject_name: str
+    display_order: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None

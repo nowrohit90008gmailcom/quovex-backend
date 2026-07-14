@@ -1,18 +1,14 @@
-"""Weekly accuracy drop scan — detects significant rolling-accuracy declines.
-
-This is a **placeholder** for a future feature. Currently it only logs
-notification entries without dispatching any push.
-"""
+"""Weekly accuracy drop scan — detects significant rolling-accuracy declines."""
 import logging
 from collections import defaultdict
 from datetime import datetime, timezone
 
 from app.db.session import SessionLocal
 from app.models import (
+    User,
     UserSubjectProficiency,
-    NotificationLog,
-    NotificationType,
 )
+from app.services.notification_service import send_notification
 from app.tasks.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
@@ -24,10 +20,10 @@ DROP_THRESHOLD = 0.15  # 15 percentage points on a 0-1 scale
     name="app.tasks.weekly_accuracy_drop_scan.check_accuracy_drops"
 )
 def check_accuracy_drops():
-    """Log notification entries for users whose accuracy has dropped >15 pts."""
+    """Send push notifications to users whose rolling accuracy dropped >15 pts."""
     db = SessionLocal()
     now = datetime.now(timezone.utc)
-    logged_count = 0
+    sent_count = 0
     try:
         records = (
             db.query(UserSubjectProficiency)
@@ -50,28 +46,29 @@ def check_accuracy_drops():
             previous = entries[1]
             drop = previous.rolling_accuracy_score - latest.rolling_accuracy_score
             if drop > DROP_THRESHOLD:
-                log = NotificationLog(
-                    user_id=user_id,
-                    notification_type=NotificationType.scheduled,
-                    trigger_reason="accuracy_drop_placeholder",
-                    title="Accuracy Drop Detected (Preview)",
+                user = db.query(User).filter(User.id == user_id).first()
+                if not user:
+                    continue
+                ok = send_notification(
+                    db, user,
+                    title=f"Accuracy Alert: {subject}",
                     body=(
                         f"Your {subject} accuracy dropped "
                         f"by {drop * 100:.0f} points. "
-                        f"(Historical avg: {previous.rolling_accuracy_score * 100:.0f}%, "
-                        f"Latest: {latest.rolling_accuracy_score * 100:.0f}%)"
+                        f"(Was {previous.rolling_accuracy_score * 100:.0f}%, "
+                        f"now {latest.rolling_accuracy_score * 100:.0f}%)"
                     ),
+                    trigger_reason="accuracy_drop",
+                    notification_type="scheduled",
                 )
-                db.add(log)
-                logged_count += 1
+                if ok:
+                    sent_count += 1
 
-        db.commit()
         logger.info(
-            "check_accuracy_drops: %d drops logged (placeholder)", logged_count
+            "check_accuracy_drops: %d accuracy-drop notifications sent", sent_count
         )
-        return logged_count
+        return sent_count
     except Exception as exc:
-        db.rollback()
         logger.error("check_accuracy_drops failed: %s", exc)
         raise
     finally:

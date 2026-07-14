@@ -17,9 +17,9 @@ export default function PrivacyPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">1. Introduction</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            StudyTimer Inc. (&quot;StudyTimer,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting the privacy of all individuals who use our
+            Quovex Inc. (&quot;Quovex,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) is committed to protecting the privacy of all individuals who use our
             mobile application and web platform (collectively, the &quot;Service&quot;). This Privacy Policy explains how we collect,
-            use, disclose, and safeguard your information when you access and use the StudyTimer application, website, and
+            use, disclose, and safeguard your information when you access and use the Quovex application, website, and
             related services, including but not limited to our exam preparation tools, quiz engine, app lock functionality,
             reward system, and referral program.
           </p>
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">2. Information We Collect</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             We collect various categories of information to provide, personalize, and improve the Service. The types of
-            information we collect depend on how you interact with StudyTimer.
+            information we collect depend on how you interact with Quovex.
           </p>
 
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">2.1 Personal Information</h3>
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             We automatically collect certain information about the device you use to access the Service, including: device
             type and model (e.g., smartphone, tablet, or desktop), operating system version (e.g., iOS, Android, Windows,
-            macOS), StudyTimer application version number, unique device identifiers (such as Android Advertising ID,
+            macOS), Quovex application version number, unique device identifiers (such as Android Advertising ID,
             iOS Identifier for Advertisers (IDFA), or similar device-level identifiers), and device language and regional
             settings. This information helps us optimize the Service for your device, diagnose technical issues, and
             prevent fraud.
@@ -85,7 +85,7 @@ export default function PrivacyPage() {
 
           <h3 className="text-[16px] font-semibold text-[#141b2b] mt-6 mb-2">2.5 App Lock Data</h3>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            StudyTimer offers an optional app lock feature that restricts access to certain applications on your device
+            Quovex offers an optional app lock feature that restricts access to certain applications on your device
             during study sessions. To operate this feature, we collect: a list of applications you choose to lock or
             whitelist, lock and unlock event timestamps, credit balance information related to the app lock reward system,
             unlock history including the frequency and timing of attempted unlocks, and session compliance data. This
@@ -169,7 +169,7 @@ export default function PrivacyPage() {
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             <strong>Personalization:</strong> We use your profile information, academic data, and usage patterns to
-            personalize your StudyTimer experience, including recommending relevant study materials, tailoring quiz
+            personalize your Quovex experience, including recommending relevant study materials, tailoring quiz
             difficulty to your performance level, and customizing the application interface to your preferences.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -246,7 +246,7 @@ export default function PrivacyPage() {
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             <strong>Contract Performance (Article 6(1)(b)):</strong> We process your personal data as necessary to
-            perform our obligations under the Terms of Service governing your use of the StudyTimer platform. This
+            perform our obligations under the Terms of Service governing your use of the Quovex platform. This
             includes account management, quiz delivery, leaderboard functionality, reward administration, and app lock
             operation.
           </p>
@@ -287,7 +287,7 @@ export default function PrivacyPage() {
             personalized advertising through your device&apos;s advertising settings.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            <strong>Firebase (Optional):</strong> StudyTimer may use Google Firebase services for analytics, crash
+            <strong>Firebase (Optional):</strong> Quovex may use Google Firebase services for analytics, crash
             reporting, and push notification delivery. Firebase&apos;s data handling is governed by Google&apos;s Privacy Policy
             and the Firebase Terms of Service. Data collected by Firebase may be transferred to and processed by Google
             servers in the United States or other jurisdictions.
@@ -365,11 +365,11 @@ export default function PrivacyPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">8. Data Security</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            StudyTimer implements a comprehensive security program designed to protect your personal information against
+            Quovex implements a comprehensive security program designed to protect your personal information against
             unauthorized access, alteration, disclosure, or destruction. Our security measures include:
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            <strong>Encryption in Transit:</strong> All data transmitted between the StudyTimer application and our
+            <strong>Encryption in Transit:</strong> All data transmitted between the Quovex application and our
             servers is encrypted using Transport Layer Security (TLS) protocol version 1.3, ensuring that your
             information is protected during transmission over public networks.
           </p>
@@ -388,7 +388,7 @@ export default function PrivacyPage() {
             penetration testing of our systems and infrastructure to identify and address potential security weaknesses.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            <strong>Employee Training:</strong> All StudyTimer employees and contractors who handle personal data
+            <strong>Employee Training:</strong> All Quovex employees and contractors who handle personal data
             receive mandatory training on data protection, privacy, and security best practices. We maintain
             confidentiality agreements and enforce disciplinary measures for violations of our security policies.
           </p>
@@ -396,7 +396,7 @@ export default function PrivacyPage() {
             <strong>Limitations:</strong> Despite our best efforts, no method of electronic storage or transmission
             over the Internet is 100% secure. We cannot guarantee absolute security of your data. By using the Service,
             you acknowledge that you transmit your personal data at your own risk. If you have reason to believe that
-            your account or data is no longer secure, please contact us immediately at privacy@studytimer.com.
+            your account or data is no longer secure, please contact us immediately at supportquovex@gmail.com.
           </p>
         </div>
 
@@ -458,7 +458,7 @@ export default function PrivacyPage() {
             <strong>Right to Withdraw Consent:</strong> Where processing is based on your consent, you have the right
             to withdraw that consent at any time. Withdrawal of consent does not affect the lawfulness of processing
             carried out prior to withdrawal. You can withdraw consent by adjusting your settings or contacting us at
-            privacy@studytimer.com.
+            supportquovex@gmail.com.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             <strong>Right to Lodge a Complaint:</strong> You have the right to lodge a complaint with your local
@@ -486,7 +486,7 @@ export default function PrivacyPage() {
             a transaction, detect security incidents, comply with legal obligations, or exercise free speech rights).
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            <strong>Right to Opt-Out of Sale:</strong> StudyTimer does not sell personal information as defined under
+            <strong>Right to Opt-Out of Sale:</strong> Quovex does not sell personal information as defined under
             the CCPA. We do not and will not sell your personal information to third parties for monetary or other
             valuable consideration.
           </p>
@@ -506,7 +506,7 @@ export default function PrivacyPage() {
             To exercise any of the rights described in this Section, please submit a request to:
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            Email: privacy@studytimer.com
+            Email: supportquovex@gmail.com
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             We will verify your identity before processing your request. For CCPA requests, we may ask you to provide
@@ -525,7 +525,7 @@ export default function PrivacyPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">10. Children&apos;s Privacy</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            StudyTimer is not directed at children under the age of 13 (or 16 for users in the European Economic Area,
+            Quovex is not directed at children under the age of 13 (or 16 for users in the European Economic Area,
             in accordance with Article 8 of the GDPR). We do not knowingly collect personal information from children
             below these age thresholds without verifiable parental consent.
           </p>
@@ -537,7 +537,7 @@ export default function PrivacyPage() {
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             If you are a parent or guardian and you believe that your child has provided personal information to us
-            without your consent, please contact us immediately at privacy@studytimer.com. We will investigate the
+            without your consent, please contact us immediately at supportquovex@gmail.com. We will investigate the
             matter and, if confirmed, delete the child&apos;s personal data and terminate the account.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
@@ -562,7 +562,7 @@ export default function PrivacyPage() {
             Commission or the UK Secretary of State (as applicable), we rely on Standard Contractual Clauses (SCCs)
             adopted by the European Commission and recognized by the UK Information Commissioner&apos;s Office to ensure that
             your data receives an equivalent level of protection. You may request a copy of the relevant SCCs by
-            contacting us at privacy@studytimer.com.
+            contacting us at supportquovex@gmail.com.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
             <strong>Other International Transfers:</strong> For users in other jurisdictions, we ensure that
@@ -581,7 +581,7 @@ export default function PrivacyPage() {
         <div className="bg-white rounded-xl border border-[#c4c5d5] p-6 mb-4">
           <h2 className="text-[20px] font-semibold text-[#141b2b] mt-0 mb-4">12. Cookies and Tracking Technologies</h2>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
-            The StudyTimer Service uses cookies, web beacons, and similar tracking technologies to enhance functionality,
+            The Quovex Service uses cookies, web beacons, and similar tracking technologies to enhance functionality,
             analyze usage, and deliver advertising. We categorize cookies as follows:
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -624,7 +624,7 @@ export default function PrivacyPage() {
             We reserve the right to update or modify this Privacy Policy at any time. When we make material changes to
             this Policy, we will notify you through the following channels: by sending an email notification to the
             email address associated with your account at least seven (7) days before the changes take effect, and by
-            displaying a prominent in-app notice within the StudyTimer application requesting your review of the
+            displaying a prominent in-app notice within the Quovex application requesting your review of the
             updated Policy.
           </p>
           <p className="text-[14px] leading-[24px] text-[#444653] mb-4">
@@ -654,7 +654,7 @@ export default function PrivacyPage() {
             <div>
               <p className="text-[14px] leading-[24px] text-[#141b2b] font-semibold mb-0">Email (Primary):</p>
               <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
-                <a href="mailto:privacy@studytimer.com" className="text-[#00288e] hover:underline">privacy@studytimer.com</a>
+                <a href="mailto:supportquovex@gmail.com" className="text-[#00288e] hover:underline">supportquovex@gmail.com</a>
               </p>
             </div>
           </div>
@@ -664,7 +664,7 @@ export default function PrivacyPage() {
             <div>
               <p className="text-[14px] leading-[24px] text-[#141b2b] font-semibold mb-0">Data Protection Officer (DPO):</p>
               <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
-                <a href="mailto:dpo@studytimer.com" className="text-[#00288e] hover:underline">dpo@studytimer.com</a>
+                <a href="mailto:supportquovex@gmail.com" className="text-[#00288e] hover:underline">supportquovex@gmail.com</a>
               </p>
             </div>
           </div>
@@ -674,7 +674,7 @@ export default function PrivacyPage() {
             <div>
               <p className="text-[14px] leading-[24px] text-[#141b2b] font-semibold mb-0">Physical Address:</p>
               <p className="text-[14px] leading-[24px] text-[#444653] mb-0">
-                StudyTimer Inc.<br />
+                Quovex Inc.<br />
                 100 Innovation Drive, Suite 400<br />
                 San Francisco, CA 94105<br />
                 United States

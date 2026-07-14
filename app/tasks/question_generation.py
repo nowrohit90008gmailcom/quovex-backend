@@ -22,6 +22,19 @@ SUBJECTS_EXAM_TAGS = [
     ("General Science", "General Study"),
 ]
 
+
+def _get_grade_subject_combos() -> list[tuple[str, str]]:
+    """Read (grade_or_tag, subject_name) pairs from grade_subjects table."""
+    try:
+        from app.db.session import SessionLocal
+        from app.models import GradeSubject
+        db = SessionLocal()
+        rows = db.query(GradeSubject.grade_or_tag, GradeSubject.subject_name).distinct().all()
+        db.close()
+        return [(r.subject_name, r.grade_or_tag) for r in rows]
+    except Exception:
+        return []
+
 GENERATION_PROMPT = """Generate {count} quiz questions for subject: {subject}, exam: {exam_tag}, difficulty: {difficulty}.
 
 Return ONLY a valid JSON array. Each object must have:
@@ -48,23 +61,44 @@ def _pick_api_key() -> str:
 
 
 @celery_app.task(name="app.tasks.question_generation.generate_quiz_questions")
-def generate_quiz_questions(subject: str = None, exam_tag: str = None, count_per_combo: int = 20):
-    """Generate quiz questions via Cerebras API and store in DB as pending_review."""
+def generate_quiz_questions(subject: str = None, exam_tag: str = None, grade_or_tag: str = None, count_per_combo: int = 20):
+    """Generate quiz questions via Cerebras API and store in DB as live."""
     api_key = _pick_api_key()
     if not api_key:
         logger.warning("No Cerebras API keys configured, skipping generation")
         return
 
-    combos = [(subject, exam_tag)] if subject and exam_tag else SUBJECTS_EXAM_TAGS
+    # Build combos
+    combos: list[tuple[str, str, str | None, str | None]]
+    if subject and (exam_tag or grade_or_tag):
+        # Specific combo requested
+        tag_label = exam_tag or grade_or_tag
+        combos = [(subject, tag_label, exam_tag, grade_or_tag)]
+    else:
+        # All exam-tag combos + all grade-subject combos
+        exam_combos: list[tuple[str, str, str | None, str | None]] = [
+            (s, t, t, None) for s, t in SUBJECTS_EXAM_TAGS
+        ]
+        grade_combos: list[tuple[str, str, str | None, str | None]] = [
+            (subject_name, grade_tag, None, grade_tag)
+            for subject_name, grade_tag in _get_grade_subject_combos()
+        ]
+        seen = set()
+        combos = []
+        for c in exam_combos + grade_combos:
+            key = (c[0], c[1])
+            if key not in seen:
+                seen.add(key)
+                combos.append(c)
 
     db = SessionLocal()
     total_generated = 0
 
     try:
-        for subj, tag in combos:
+        for subj, label, e_tag, g_tag in combos:
             for diff in [Difficulty.easy, Difficulty.medium, Difficulty.hard]:
                 try:
-                    questions = _call_cerebras(api_key, subj, tag, diff.value, count_per_combo)
+                    questions = _call_cerebras(api_key, subj, label, diff.value, count_per_combo)
                     for q_data in questions:
                         if not q_data.get("text") or not q_data.get("correct_answer"):
                             logger.warning(f"Skipping malformed question from Cerebras: {q_data}")
@@ -76,7 +110,8 @@ def generate_quiz_questions(subject: str = None, exam_tag: str = None, count_per
                             explanation=q_data.get("explanation"),
                             question_type=QuestionType.mcq,
                             subject=subj,
-                            exam_tag=tag,
+                            exam_tag=e_tag,
+                            grade_or_tag=g_tag,
                             difficulty=diff,
                             status=QuestionStatus.live,
                             generated_at=datetime.now(timezone.utc),
@@ -84,9 +119,9 @@ def generate_quiz_questions(subject: str = None, exam_tag: str = None, count_per
                         db.add(q)
                         total_generated += 1
                     db.commit()
-                    logger.info(f"Generated {len(questions)} questions for {subj}/{tag}/{diff.value}")
+                    logger.info(f"Generated {len(questions)} questions for {subj}/{label}/{diff.value}")
                 except Exception as e:
-                    logger.error(f"Failed to generate questions for {subj}/{tag}/{diff.value}: {e}")
+                    logger.error(f"Failed to generate questions for {subj}/{label}/{diff.value}: {e}")
                     db.rollback()
     finally:
         db.close()

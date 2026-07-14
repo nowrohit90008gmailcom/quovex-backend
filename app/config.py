@@ -1,11 +1,14 @@
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 
+DEFAULT_SECRET = "change-me-in-production"
+
+
 class Settings(BaseSettings):
     APP_NAME: str = "Quovex API"
     APP_VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
-    SECRET_KEY: str = "change-me-in-production"
+    SECRET_KEY: str = DEFAULT_SECRET
     DATABASE_URL: str = "sqlite:///./studytimer.db"
     REDIS_URL: str = "redis://localhost:6379/0"
     FIREBASE_PROJECT_ID: str = "quovex-84b14"
@@ -35,10 +38,25 @@ class Settings(BaseSettings):
     EMAIL_USER: str = ""
     EMAIL_PASS: str = ""
     BREVO_API_KEY: str = ""
-    FROM_EMAIL: str = ""
     QUIZ_SET_SIZE: int = 10
     QUIZ_QUESTION_TIME_LIMIT_SECONDS: int = 25
     MAX_QUIZ_ATTEMPTS_PER_SUBJECT_PER_DAY: int = 5
+    MAX_DAILY_AD_DOUBLES: int = 2
+    AD_EXTEND_MINUTES: int = 15
+    AD_EXTEND_POINTS: int = 25
+    REFERRAL_BONUS_SIGNUP: int = 100
+    REFERRAL_BONUS_FIRST_SESSION: int = 50
+    QUIZ_BASE_POINTS_PER_CORRECT: int = 10
+    QUIZ_SPEED_BONUS_POINTS: int = 3
+    QUIZ_STREAK_BONUS_POINTS: int = 2
+    QUIZ_SPEED_BONUS_THRESHOLD_MS: int = 10000
+    NOTIFICATION_MAX_DAILY_PUSHES: int = 7
+    POINTS_DECAY_HALF_LIFE_MINUTES: int = 83
+    POINTS_MIN_DECAY_FACTOR: float = 0.1
+
+    SUPPORT_EMAIL: str = "supportquovex@gmail.com"
+    FROM_EMAIL: str = "supportquovex@gmail.com"
+    FIREBASE_CREDENTIALS_JSON: Optional[str] = ""
 
     UPLOAD_DIR: str = "./uploads"
 
@@ -46,5 +64,12 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"
+
+    def model_post_init(self, __context):
+        if self.ENVIRONMENT == "production" and self.SECRET_KEY == DEFAULT_SECRET:
+            raise ValueError(
+                "SECRET_KEY is still set to the default! Set a strong random secret "
+                "in the .env file before running in production."
+            )
 
 settings = Settings()

@@ -19,6 +19,8 @@ from app.services.quiz_service import (
     select_questions, check_answer, count_consecutive_correct,
     calculate_answer_points, update_proficiency,
 )
+from app.services.notification_service import send_rank_change
+from app.services.leaderboard_service import get_user_rank
 
 router = APIRouter(prefix="/quiz", tags=["quiz"])
 logger = logging.getLogger(__name__)
@@ -40,9 +42,11 @@ async def start_quiz(
     current_user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
 ):
+    grade_or_tag = body.grade_or_tag or (current_user.class_or_year if current_user.class_or_year else body.exam_tag)
+
     questions = select_questions(
         db, current_user, body.subject, body.exam_tag,
-        body.difficulty, body.question_count,
+        body.difficulty, body.question_count, grade_or_tag,
     )
     if not questions:
         raise HTTPException(status_code=404, detail="No questions available for selected criteria")
@@ -51,6 +55,7 @@ async def start_quiz(
         user_id=current_user.id,
         subject=body.subject,
         exam_tag=body.exam_tag,
+        grade_or_tag=grade_or_tag,
         topic_id=body.topic_id,
         difficulty_mode=body.difficulty,
         question_ids=[q.id for q in questions],
@@ -64,6 +69,7 @@ async def start_quiz(
     return QuizStartOut(
         quiz_session_id=quiz_session.id,
         questions=[QuizQuestionOut.model_validate(q) for q in questions],
+        grade_or_tag=grade_or_tag,
         started_at=quiz_session.start_time,
     )
 
@@ -153,6 +159,19 @@ async def complete_quiz(
     db.commit()
     db.refresh(quiz_session)
 
+    for track in ("quiz", "overall"):
+        rank_data = get_user_rank(db, current_user.id, track, "global", "month")
+        if not rank_data:
+            continue
+        new_rank = rank_data["rank"]
+        last_ranks = current_user.last_known_ranks or {}
+        old_rank = last_ranks.get(track)
+        if old_rank is not None and old_rank != new_rank:
+            send_rank_change(db, current_user, old_rank, new_rank, track)
+        last_ranks[track] = new_rank
+        current_user.last_known_ranks = last_ranks
+    db.commit()
+
     accuracy = (
         quiz_session.total_correct / quiz_session.total_questions * 100
         if quiz_session.total_questions > 0 else 0
@@ -165,6 +184,7 @@ async def complete_quiz(
         accuracy_percent=round(accuracy, 1),
         points_earned=quiz_session.points_earned,
         verified_quiz_score_earned=quiz_session.verified_quiz_score_earned,
+        grade_or_tag=quiz_session.grade_or_tag,
         ad_double_available=not quiz_session.ad_doubled,
         bonus_questions_available=not quiz_session.bonus_questions_added,
         message=f"Quiz complete! {quiz_session.total_correct}/{quiz_session.total_questions} correct",

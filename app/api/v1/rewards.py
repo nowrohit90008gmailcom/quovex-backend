@@ -63,6 +63,8 @@ class RewardDetailOut(BaseModel):
     reward_type: RewardType
     reward_amount_usd: Optional[float]
     reward_description: Optional[str]
+    custom_reward_name: Optional[str] = None
+    reward_image_url: Optional[str] = None
     status: RewardStatus
     kyc_verified: bool
     kyc_verification_id: Optional[str]
@@ -74,6 +76,12 @@ class RewardDetailOut(BaseModel):
     kyc_institution_name: Optional[str] = None
     kyc_student_id_image_url: Optional[str] = None
     kyc_notes: Optional[str] = None
+    delivery_address_line1: Optional[str] = None
+    delivery_address_line2: Optional[str] = None
+    delivery_city: Optional[str] = None
+    delivery_state: Optional[str] = None
+    delivery_pincode: Optional[str] = None
+    delivery_landmark: Optional[str] = None
     claimed_at: Optional[datetime]
     sent_at: Optional[datetime]
     admin_notes: Optional[str]
@@ -181,6 +189,12 @@ async def submit_kyc(
     institution_name: str = Form(...),
     notes: Optional[str] = Form(None),
     photo: Optional[UploadFile] = File(None),
+    delivery_address_line1: Optional[str] = Form(None),
+    delivery_address_line2: Optional[str] = Form(None),
+    delivery_city: Optional[str] = Form(None),
+    delivery_state: Optional[str] = Form(None),
+    delivery_pincode: Optional[str] = Form(None),
+    delivery_landmark: Optional[str] = Form(None),
     current_user: User = Depends(get_current_user),
     db: DBSession = Depends(get_db),
 ):
@@ -219,6 +233,13 @@ async def submit_kyc(
     reward.kyc_notes = notes
     if photo_url:
         reward.kyc_student_id_image_url = photo_url
+    if reward.reward_type == RewardType.physical_item:
+        reward.delivery_address_line1 = delivery_address_line1
+        reward.delivery_address_line2 = delivery_address_line2
+        reward.delivery_city = delivery_city
+        reward.delivery_state = delivery_state
+        reward.delivery_pincode = delivery_pincode
+        reward.delivery_landmark = delivery_landmark
 
     db.commit()
     db.refresh(reward)
@@ -528,6 +549,8 @@ def _enrich_reward(reward: Reward, user: Optional[User]) -> RewardDetailOut:
         reward_type=reward.reward_type,
         reward_amount_usd=reward.reward_amount_usd,
         reward_description=reward.reward_description,
+        custom_reward_name=reward.custom_reward_name,
+        reward_image_url=reward.reward_image_url,
         status=reward.status,
         kyc_verified=reward.kyc_verified,
         kyc_verification_id=reward.kyc_verification_id,

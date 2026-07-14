@@ -1,9 +1,10 @@
 """Endpoints for subjects, topics, and topic-level analytics."""
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
+from app.core.limiter import limiter
 from app.db.session import get_db
 from app.models import User, Topic, UserTopicProgress, QuizSession
 from app.schemas import TopicOut, TopicProgressOut
@@ -13,7 +14,9 @@ router = APIRouter(prefix="/topics", tags=["Topics"])
 
 
 @router.get("", response_model=list[TopicOut])
+@limiter.limit("30/minute")
 async def list_topics(
+    request: Request,
     subject: Optional[str] = Query(None),
     exam_tag: Optional[str] = Query(None),
     db: Session = Depends(get_db),

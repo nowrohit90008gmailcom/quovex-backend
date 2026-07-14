@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/students', icon: 'school', label: 'Students' },
   { href: '/dashboard/leaderboards', icon: 'leaderboard', label: 'Leaderboards' },
   { href: '/dashboard/rewards', icon: 'card_giftcard', label: 'Rewards', badge: 'KYC' },
+  { href: '/dashboard/rewards/config', icon: 'settings_suggest', label: 'Reward Config' },
   { href: '/dashboard/anti-cheat', icon: 'security', label: 'Anti-Cheat' },
   { href: '/dashboard/quiz', icon: 'quiz', label: 'Quiz Questions' },
   { href: '/dashboard/exam-tags', icon: 'label', label: 'Exam Tags' },
@@ -49,6 +50,7 @@ export default function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
+    if (href === '/dashboard/rewards') return pathname === '/dashboard/rewards';
     return pathname.startsWith(href);
   };
 
@@ -57,10 +59,8 @@ export default function Sidebar() {
       {/* Brand */}
       <div className="px-6 mb-8 flex flex-col gap-1">
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-[#00288e] flex items-center justify-center text-white">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>timer</span>
-          </div>
-          <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.01em] text-white font-bold">StudyTimer</h2>
+          <img src="/logo.png" alt="Quovex" className="w-8 h-8" />
+          <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.01em] text-white font-bold">Quovex</h2>
         </div>
         <p className="text-[#9CA3AF] text-[12px] leading-[16px] tracking-[0.05em] font-medium uppercase ml-11">Admin Console</p>
       </div>

@@ -11,8 +11,9 @@ from app.schemas import (
 
 router = APIRouter(prefix="/referral", tags=["referral"])
 
-REFERRAL_BONUS_SIGNUP = 100
-REFERRAL_BONUS_FIRST_SESSION = 50
+from app.config import settings as app_config
+REFERRAL_BONUS_SIGNUP = app_config.REFERRAL_BONUS_SIGNUP
+REFERRAL_BONUS_FIRST_SESSION = app_config.REFERRAL_BONUS_FIRST_SESSION
 
 
 @router.get("/stats", response_model=ReferralStatsOut)

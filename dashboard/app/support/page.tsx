@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] });
 const faqItems = [
   {
     question: 'How do I start a study session?',
-    answer: 'Open the StudyTimer app and tap the "Start Session" button on the home screen. You can choose between Focus Mode, Pomodoro Timer, or a Custom Session. Set your preferred duration and subject tags before starting. The timer will begin counting down, and you can earn rewards upon successful completion.'
+    answer: 'Open the Quovex app and tap the "Start Session" button on the home screen. You can choose between Focus Mode, Pomodoro Timer, or a Custom Session. Set your preferred duration and subject tags before starting. The timer will begin counting down, and you can earn rewards upon successful completion.'
   },
   {
     question: 'How do I earn and redeem rewards?',
@@ -36,7 +36,7 @@ const faqItems = [
     answer: 'A streak is counted for each consecutive day you complete at least one study session of 15 minutes or more. Streaks reset at midnight in your local timezone if no session is logged. Maintaining longer streaks unlocks bonus coin multipliers, exclusive badges, and special rewards in the Rewards Shop.'
   },
   {
-    question: 'Can I use StudyTimer on multiple devices?',
+    question: 'Can I use Quovex on multiple devices?',
     answer: 'Yes, your account can be used on multiple devices simultaneously. Simply log in with the same credentials on each device. Your study data and progress sync in real time across all platforms. Note that running concurrent sessions on different devices may result in only the first session being counted for streak purposes.'
   },
   {
@@ -244,8 +244,8 @@ export default function SupportPage() {
           <div className="mt-6 pt-4 border-t border-[#e5e7eb]">
             <p className="text-[14px] text-[#6b7280]">
               You can also reach us directly at{' '}
-              <a href="mailto:support@studytimer.com" className="text-[#00288e] hover:underline font-medium">
-                support@studytimer.com
+              <a href="mailto:supportquovex@gmail.com" className="text-[#00288e] hover:underline font-medium">
+supportquovex@gmail.com
               </a>
             </p>
           </div>

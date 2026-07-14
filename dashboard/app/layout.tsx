@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'StudyTimer Admin',
-  description: 'Admin dashboard for StudyTimer — user management, rewards, anti-cheat, analytics',
+  title: 'Quovex Admin',
+  description: 'Admin dashboard for Quovex — user management, rewards, anti-cheat, analytics',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

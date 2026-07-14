@@ -7,6 +7,7 @@ from sqlalchemy import func
 from app.config import settings
 from app.db.session import SessionLocal
 from app.models import User
+from app.services.notification_service import send_notification
 from app.services.report_service import generate_report
 from app.tasks.celery_app import celery_app
 
@@ -29,6 +30,13 @@ def generate_daily_reports():
         for user in active_users:
             try:
                 generate_report(user, "daily", db)
+                send_notification(
+                    db, user,
+                    title="Daily Study Report Ready",
+                    body="Your AI-powered daily study report is here! Check your progress and tips.",
+                    trigger_reason="daily_report_ready",
+                    notification_type="scheduled",
+                )
                 logger.info(f"Daily report generated for user {user.id}")
             except Exception as e:
                 logger.error(f"Failed to generate daily report for user {user.id}: {e}")
@@ -53,6 +61,13 @@ def generate_weekly_reports():
         for user in active_users:
             try:
                 generate_report(user, "weekly", db)
+                send_notification(
+                    db, user,
+                    title="Weekly Study Report Ready",
+                    body="Your AI-powered weekly study report is here! See your highlights and recommendations.",
+                    trigger_reason="weekly_report_ready",
+                    notification_type="scheduled",
+                )
                 logger.info(f"Weekly report generated for user {user.id}")
             except Exception as e:
                 logger.error(f"Failed to generate weekly report for user {user.id}: {e}")

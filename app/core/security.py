@@ -11,7 +11,7 @@ from functools import lru_cache
 
 import firebase_admin
 from firebase_admin import auth as firebase_auth, credentials
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
@@ -115,17 +115,23 @@ def _try_jwt_auth(token: str, db: Session) -> Optional[User]:
 # ─── FastAPI Dependencies ─────────────────────────────────────────────────────
 
 async def get_current_user(
+    request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
     """
     Universal auth dependency.
-    Accepts either a Firebase ID token (mobile) or an admin JWT (dashboard).
+    Accepts either a Firebase ID token (mobile), an admin JWT (dashboard via header),
+    or an admin_token cookie (dashboard via cookie).
     """
-    if credentials is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    token = None
+    if credentials is not None:
+        token = credentials.credentials
+    elif request.cookies.get("admin_token"):
+        token = request.cookies["admin_token"]
 
-    token = credentials.credentials
+    if token is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
     # 1. Try JWT first (fast, no network)
     user = _try_jwt_auth(token, db)

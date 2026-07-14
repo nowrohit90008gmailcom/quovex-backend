@@ -181,17 +181,43 @@ ufw allow 443/tcp comment 'HTTPS'
 ufw --force enable
 log "Firewall active: ports 22, 80, 443"
 
-# ─── 11. Run Migrations ───────────────────────────────────────────────────────
+# ─── 11. Database Backups ──────────────────────────────────────────────────────
+log "Setting up daily DB backups (3:00 AM UTC, 7-day retention)..."
+mkdir -p "$PROJECT_DIR/backups"
+chown quovex:quovex "$PROJECT_DIR/backups"
+cp "$PROJECT_DIR/deploy/quovex-backup.cron" /etc/cron.d/quovex-backup
+chmod 644 /etc/cron.d/quovex-backup
+log "Backup cron installed at /etc/cron.d/quovex-backup"
+
+# ─── 12. Run Migrations ───────────────────────────────────────────────────────
 log "Running Alembic migrations..."
 # Export .env so alembic picks up DATABASE_URL (PostgreSQL) instead of SQLite fallback
 set -a; source "$PROJECT_DIR/.env"; set +a
 cd "$PROJECT_DIR" && ./venv/bin/alembic upgrade head
 
-# ─── 12. Create Admin Accounts ───────────────────────────────────────────────
+# ─── 12b. Seed Grade Subjects ─────────────────────────────────────────────────
+log "Seeding grade subjects..."
+cd "$PROJECT_DIR" && ./venv/bin/python -m app.seed_grade_subjects
+
+# ─── 12c. Generate Quiz Questions ─────────────────────────────────────────────
+log "Checking question count (generation will happen after services start)..."
+cd "$PROJECT_DIR" && ./venv/bin/python -c "
+from app.db.session import SessionLocal
+from app.models import QuizQuestion
+db = SessionLocal()
+cnt = db.query(QuizQuestion).count()
+db.close()
+print(f'{cnt} questions exist')
+if cnt < 10:
+    print('WARNING: No questions yet. After services start, run:')
+    print('  curl -X POST https://\${DOMAIN_API}/api/v1/admin/quiz/generate')
+"
+
+# ─── 13. Create Admin Accounts ───────────────────────────────────────────────
 log "Creating admin accounts..."
 cd "$PROJECT_DIR" && ./venv/bin/python create_admin.py
 
-# ─── 13. Install systemd Services ────────────────────────────────────────────
+# ─── 14. Install systemd Services ────────────────────────────────────────────
 log "Installing systemd service files..."
 cp "$PROJECT_DIR/deploy/quovex-backend.service" /etc/systemd/system/
 cp "$PROJECT_DIR/deploy/quovex-celery-worker.service" /etc/systemd/system/
@@ -206,10 +232,19 @@ systemctl enable --now quovex-dashboard
 
 log "All services enabled and started"
 
-# ─── 14. Own everything ──────────────────────────────────────────────────────
+# ─── 14b. Trigger Initial Question Generation ─────────────────────────────────
+log "Generating initial quiz questions via Celery task..."
+# Run directly via Python to avoid auth requirement — generates 5 questions per combo
+cd "$PROJECT_DIR" && ./venv/bin/python -c "
+from app.tasks.question_generation import generate_quiz_questions
+result = generate_quiz_questions(count_per_combo=5)
+print(result)
+" || warn "Question generation failed — trigger manually from admin dashboard"
+
+# ─── 15. Own everything ──────────────────────────────────────────────────────
 chown -R quovex:quovex "$PROJECT_DIR"
 
-# ─── 15. Final Status ────────────────────────────────────────────────────────
+# ─── 16. Final Status ────────────────────────────────────────────────────────
 log "================================"
 log "  Quovex deployment complete!"
 log "================================"
@@ -226,6 +261,10 @@ systemctl is-active quovex-backend quovex-celery-worker quovex-celery-beat quove
 log ""
 log "  View logs: journalctl -u quovex-backend -f"
 log "  Restart:   systemctl restart quovex-backend"
+log ""
+log ""
+log "  Backups: daily at 3:00 UTC to /opt/quovex/backups/ (7-day retention)"
+log "  Restore: pg_restore -h 127.0.0.1 -U quovex -d quovex /opt/quovex/backups/latest.sql.gz"
 log ""
 warn "  NEXT STEPS:"
 warn "  1. Point DNS A records: ${DOMAIN_API} and ${DOMAIN_ADMIN} -> $(curl -4 -s ifconfig.me 2>/dev/null || echo '<VPS_IP>')"

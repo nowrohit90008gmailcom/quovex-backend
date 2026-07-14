@@ -134,6 +134,50 @@ scp C:\path\to\your\file.json root@<YOUR_VPS_IP>:/opt/quovex/
 scp root@<YOUR_VPS_IP>:/opt/quovex/some_log.txt C:\path\to\save\
 ```  
 
+## 8. Database Backups
+Backups run automatically every day at 3:00 AM UTC via cron. They are stored in `/opt/quovex/backups/`.
+
+**Verify backup cron is active:**
+```bash
+cat /etc/cron.d/quovex-backup        # should show the cron line
+systemctl is-active cron              # should show "active"
+```
+
+**Manually trigger a backup (test it now):**
+```bash
+sudo -u quovex /opt/quovex/deploy/backup.sh
+cat /var/log/quovex-backup.log
+```
+
+**List available backups:**
+```bash
+ls -lh /opt/quovex/backups/
+```
+
+**Restore the latest backup (replaces existing DB):**
+```bash
+PGPASSWORD=$(grep POSTGRES_PASSWORD /opt/quovex/.env | cut -d= -f2-) \
+pg_restore -h 127.0.0.1 -U quovex -d quovex --clean /opt/quovex/backups/latest.sql.gz
+```
+
+**Restore to a new database (safety first):**
+```bash
+su - postgres -c "createdb quovex_restore"
+PGPASSWORD=$(grep POSTGRES_PASSWORD /opt/quovex/.env | cut -d= -f2-) \
+pg_restore -h 127.0.0.1 -U quovex -d quovex_restore /opt/quovex/backups/latest.sql.gz
+```
+
+**Inspect backup contents without restoring:**
+```bash
+pg_restore --list /opt/quovex/backups/latest.sql.gz | head -50
+```
+
+**Restore a single table (e.g., users):**
+```bash
+PGPASSWORD=$(grep POSTGRES_PASSWORD /opt/quovex/.env | cut -d= -f2-) \
+pg_restore -h 127.0.0.1 -U quovex -d quovex --table=users /opt/quovex/backups/latest.sql.gz
+```
+
 // push to git from pc
 cd C:\Users\Testbook\Downloads\study\studytimer_backend
 git add setup_native.sh; git commit -m "Fix: always rm -rf and clone fresh to avoid useradd dir conflict"; git push origin main

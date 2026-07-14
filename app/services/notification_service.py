@@ -15,7 +15,8 @@ from app.models import NotificationLog, User
 
 logger = logging.getLogger(__name__)
 
-MAX_DAILY_PUSHES = 3
+from app.config import settings as app_config
+MAX_DAILY_PUSHES = app_config.NOTIFICATION_MAX_DAILY_PUSHES
 
 
 def _get_firebase_app():
@@ -33,6 +34,25 @@ def _get_firebase_app():
         else:
             return None
     return firebase_admin.get_app()
+
+
+def _get_pref_key(trigger_reason: str, notification_type: str):
+    """Map a notification to its notification_prefs key, or None if always-allowed (broadcasts)."""
+    if notification_type == "admin_broadcast":
+        return None
+    if trigger_reason.startswith("streak_risk"):
+        return "streak_reminder"
+    if trigger_reason.startswith("rank_change"):
+        return "rank_change"
+    if trigger_reason.startswith("badge_"):
+        return "badge_unlock"
+    if trigger_reason in ("reward_created", "kyc_reminder", "kyc_approved", "reward_sent"):
+        return "reward_announcement"
+    if trigger_reason in ("daily_reminder", "daily_target_met", "daily_report_ready", "weekly_report_ready"):
+        return "daily_recap"
+    if trigger_reason == "accuracy_drop" or trigger_reason.startswith("weak_subject"):
+        return "weak_subject_nudge"
+    return None
 
 
 def _get_daily_send_count(db: Session, user_id: UUID) -> int:
@@ -67,6 +87,12 @@ def send_notification(
     if daily_count >= MAX_DAILY_PUSHES:
         logger.info(f"User {user.id} hit daily push cap ({MAX_DAILY_PUSHES}); skipping")
         return False
+
+    pref_key = _get_pref_key(trigger_reason, notification_type)
+    if pref_key and user.notification_prefs:
+        if not user.notification_prefs.get(pref_key, True):
+            logger.info(f"User {user.id} disabled {pref_key} notifications; skipping")
+            return False
 
     if not user.fcm_token:
         logger.info(f"User {user.id} has no FCM token; logging without send")

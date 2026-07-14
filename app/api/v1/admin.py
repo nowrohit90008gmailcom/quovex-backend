@@ -262,6 +262,7 @@ async def list_questions(
     status: Optional[str] = Query("live"),  # all questions are live by default
     subject: Optional[str] = Query(None),
     exam_tag: Optional[str] = Query(None),
+    grade_or_tag: Optional[str] = Query(None),
     difficulty: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
     limit: int = Query(100, le=500),
@@ -280,6 +281,8 @@ async def list_questions(
         query = query.filter(QuizQuestion.subject == subject)
     if exam_tag:
         query = query.filter(QuizQuestion.exam_tag == exam_tag)
+    if grade_or_tag:
+        query = query.filter(QuizQuestion.grade_or_tag == grade_or_tag)
     if difficulty:
         query = query.filter(QuizQuestion.difficulty == difficulty)
     if search:
@@ -331,12 +334,15 @@ async def delete_question(
 async def trigger_question_generation(
     subject: Optional[str] = None,
     exam_tag: Optional[str] = None,
+    grade_or_tag: Optional[str] = None,
     count_per_combo: int = 20,
     admin=Depends(get_current_admin),
 ):
-    """Trigger async Cerebras question generation. Questions go live immediately on creation."""
+    """Trigger async Cerebras question generation. Questions go live immediately on creation.
+    - Specify subject+exam_tag OR subject+grade_or_tag for a specific combo.
+    - Omit all to generate for all exam-tag and grade-subject combos."""
     from app.tasks.question_generation import generate_quiz_questions
-    generate_quiz_questions.delay(subject=subject, exam_tag=exam_tag, count_per_combo=count_per_combo)
+    generate_quiz_questions.delay(subject=subject, exam_tag=exam_tag, grade_or_tag=grade_or_tag, count_per_combo=count_per_combo)
     return {
         "status": "queued",
         "message": "Question generation job queued. Questions will appear live within a few minutes.",
@@ -737,7 +743,7 @@ async def get_settings(
 
 @router.put("/settings")
 async def update_settings(
-    body: Dict[str, str],
+    body: Dict[str, str] = Body(...),
     admin=Depends(get_current_admin),
     db: DBSession = Depends(get_db),
 ):
@@ -891,6 +897,7 @@ async def list_questions_wrapped(
     status: Optional[str] = Query("live"),
     subject: Optional[str] = Query(None),
     exam_tag: Optional[str] = Query(None),
+    grade_or_tag: Optional[str] = Query(None),
     difficulty: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
     limit: int = Query(100, le=500),
@@ -898,7 +905,7 @@ async def list_questions_wrapped(
     admin=Depends(get_current_admin),
     db: DBSession = Depends(get_db),
 ):
-    """Frontend-compatible: GET /admin/quiz → wrapped {questions, total, by_difficulty, by_subject, by_exam}"""
+    """Frontend-compatible: GET /admin/quiz → wrapped {questions, total, by_difficulty, by_subject, by_exam, by_grade}"""
     query = db.query(QuizQuestion)
     if status:
         try:
@@ -909,6 +916,8 @@ async def list_questions_wrapped(
         query = query.filter(QuizQuestion.subject == subject)
     if exam_tag:
         query = query.filter(QuizQuestion.exam_tag == exam_tag)
+    if grade_or_tag:
+        query = query.filter(QuizQuestion.grade_or_tag == grade_or_tag)
     if difficulty:
         query = query.filter(QuizQuestion.difficulty == difficulty)
     if search:
@@ -924,6 +933,7 @@ async def list_questions_wrapped(
     by_difficulty = {}
     by_subject = {}
     by_exam = {}
+    by_grade = {}
     all_q = db.query(QuizQuestion).all()
     for q in all_q:
         d = q.difficulty.value if q.difficulty else "unknown"
@@ -932,6 +942,8 @@ async def list_questions_wrapped(
         by_subject[s] = by_subject.get(s, 0) + 1
         e = q.exam_tag or "unknown"
         by_exam[e] = by_exam.get(e, 0) + 1
+        g = q.grade_or_tag or "unknown"
+        by_grade[g] = by_grade.get(g, 0) + 1
 
     return {
         "questions": [QuizQuestionAdminOut.model_validate(q) for q in questions],
@@ -939,6 +951,7 @@ async def list_questions_wrapped(
         "by_difficulty": by_difficulty,
         "by_subject": by_subject,
         "by_exam": by_exam,
+        "by_grade": by_grade,
     }
 
 

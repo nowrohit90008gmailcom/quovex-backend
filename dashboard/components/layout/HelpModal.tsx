@@ -24,7 +24,7 @@ export default function HelpModal({ open, onClose }: { open: boolean; onClose: (
           <div><kbd className="bg-[#f1f3ff] px-2 py-0.5 rounded text-xs font-mono">Esc</kbd> Close this modal</div>
           <div><kbd className="bg-[#f1f3ff] px-2 py-0.5 rounded text-xs font-mono">Ctrl+K</kbd> Focus search</div>
           <hr className="border-[#c4c5d5]" />
-          <p className="text-[#757684] text-[13px]">For support, contact your system administrator or email support@studytimer.app</p>
+          <p className="text-[#757684] text-[13px]">For support, contact your system administrator or email supportquovex@gmail.com</p>
         </div>
       </div>
     </div>

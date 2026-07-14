@@ -72,6 +72,7 @@ class RewardStatus(str, enum.Enum):
 class RewardType(str, enum.Enum):
     giftcard = "giftcard"
     badge = "badge"
+    physical_item = "physical_item"
 
 
 class AdminRole(str, enum.Enum):
@@ -188,6 +189,9 @@ class User(Base, TimestampMixin):
     # Language preference
     language = Column(String(10), default="en", nullable=False)
 
+    # Last known leaderboard ranks per track (JSON)
+    last_known_ranks = Column(JSON, default=None, nullable=True)
+
     # Notification preferences (JSON)
     notification_prefs = Column(JSON, default={
         "daily_recap": True,
@@ -296,7 +300,8 @@ class QuizQuestion(Base, TimestampMixin):
     question_type = Column(SAEnum(QuestionType), nullable=False, default=QuestionType.mcq)
     subject = Column(String(100), nullable=False, index=True)
     exam_tag = Column(String(100), nullable=True, index=True)
-    difficulty = Column(SAEnum(Difficulty), nullable=False, default=Difficulty.medium)
+    grade_or_tag = Column(String(100), nullable=True, index=True)
+    difficulty = Column(SAEnum(Difficulty), nullable=False, default=Difficulty.medium, index=True)
     status = Column(SAEnum(QuestionStatus), nullable=False, default=QuestionStatus.pending_review, index=True)
 
     # For numerical type: acceptable tolerance
@@ -323,6 +328,7 @@ class QuizSession(Base, TimestampMixin):
 
     subject = Column(String(100), nullable=True)
     exam_tag = Column(String(100), nullable=True)
+    grade_or_tag = Column(String(100), nullable=True)
     topic_id = Column(Uuid(as_uuid=True), ForeignKey("topics.id"), nullable=True)
     difficulty_mode = Column(SAEnum(Difficulty), nullable=False, default=Difficulty.adaptive)
 
@@ -410,6 +416,8 @@ class Reward(Base, TimestampMixin):
     reward_type = Column(SAEnum(RewardType), nullable=False)
     reward_amount_usd = Column(Float, nullable=True)  # For gift cards
     reward_description = Column(String(255), nullable=True)
+    custom_reward_name = Column(String(200), nullable=True)
+    reward_image_url = Column(Text, nullable=True)
 
     status = Column(SAEnum(RewardStatus), nullable=False, default=RewardStatus.pending, index=True)
     kyc_verified = Column(Boolean, default=False, nullable=False)
@@ -425,11 +433,47 @@ class Reward(Base, TimestampMixin):
     kyc_student_id_image_url = Column(Text, nullable=True)  # Uploaded photo path
     kyc_notes = Column(Text, nullable=True)
 
+    # Delivery address (for physical_item rewards)
+    delivery_address_line1 = Column(String(255), nullable=True)
+    delivery_address_line2 = Column(String(255), nullable=True)
+    delivery_city = Column(String(100), nullable=True)
+    delivery_state = Column(String(100), nullable=True)
+    delivery_pincode = Column(String(20), nullable=True)
+    delivery_landmark = Column(String(255), nullable=True)
+
     claimed_at = Column(DateTime(timezone=True), nullable=True)
     sent_at = Column(DateTime(timezone=True), nullable=True)
     admin_notes = Column(Text, nullable=True)
 
     user = relationship("User", back_populates="rewards")
+
+
+class RewardConfig(Base, TimestampMixin):
+    """Per-month/track/tier reward configuration set by admin."""
+    __tablename__ = "reward_configs"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    period_month = Column(String(7), nullable=False, index=True)
+    track = Column(SAEnum(LeaderboardTrack), nullable=False)
+    position_label = Column(String(20), nullable=False,
+                            comment="rank_1 | rank_2 | rank_3 | top_100 | top_1000")
+    reward_name = Column(String(200), nullable=False)
+    reward_type = Column(String(50), nullable=False,
+                         comment="giftcard | badge | physical_item")
+    amount_usd = Column(Float, nullable=True)
+    image_url = Column(Text, nullable=True)
+    description = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+
+
+class GradeSubject(Base, TimestampMixin):
+    """Subject mapped to a grade/class/year or exam tag (e.g. Class 6 → Mathematics)."""
+    __tablename__ = "grade_subjects"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    grade_or_tag = Column(String(100), nullable=False, index=True)
+    subject_name = Column(String(100), nullable=False)
+    display_order = Column(Integer, default=0, nullable=False)
 
 
 class AdminActionLog(Base):

@@ -8,14 +8,14 @@ from sqlalchemy import desc, func
 
 from app.models import (
     User, Reward, LeaderboardSnapshot, AdminActionLog, Badge, AdminSetting,
-    RewardStatus, RewardType, LeaderboardTrack,
+    RewardStatus, RewardType, LeaderboardTrack, RewardConfig,
 )
 from app.services.notification_service import send_badge_unlocked
 
 
 BADGE_TIERS = {
-    "top_100": {"rank_max": 100, "type": RewardType.badge, "amount_usd": 0, "description": "Top 100 — Badge"},
-    "top_1000": {"rank_max": 1000, "type": RewardType.badge, "amount_usd": 0, "description": "Top 1000 — Badge"},
+    "top_100": {"rank_max": 100, "type": RewardType.badge, "amount_usd": 0, "description": "Top 100 \u2014 Badge"},
+    "top_1000": {"rank_max": 1000, "type": RewardType.badge, "amount_usd": 0, "description": "Top 1000 \u2014 Badge"},
 }
 
 
@@ -28,6 +28,35 @@ def _load_rank_amounts(db: Session) -> Dict[int, float]:
     }
 
 
+def _load_configs(db, period_month: str) -> Dict[str, Dict[str, RewardConfig]]:
+    rows = db.query(RewardConfig).filter(
+        RewardConfig.period_month == period_month,
+        RewardConfig.is_active == True,
+    ).all()
+    configs: Dict[str, Dict[str, RewardConfig]] = {}
+    for r in rows:
+        configs.setdefault(r.track, {})[r.position_label] = r
+    return configs
+
+
+def _get_config(
+    configs: Dict[str, Dict[str, RewardConfig]],
+    track: str, rank: int,
+) -> Optional[RewardConfig]:
+    track_cfgs = configs.get(track, {})
+    if rank == 1:
+        return track_cfgs.get("rank_1")
+    elif rank == 2:
+        return track_cfgs.get("rank_2")
+    elif rank == 3:
+        return track_cfgs.get("rank_3")
+    elif rank <= 100:
+        return track_cfgs.get("top_100")
+    elif rank <= 1000:
+        return track_cfgs.get("top_1000")
+    return None
+
+
 def freeze_leaderboard_and_create_rewards(
     db: Session,
     period_month: str,
@@ -38,6 +67,7 @@ def freeze_leaderboard_and_create_rewards(
     """
     summary = {}
     rank_amounts = _load_rank_amounts(db)
+    configs = _load_configs(db, period_month)
 
     for track in [LeaderboardTrack.study, LeaderboardTrack.quiz, LeaderboardTrack.overall]:
         track_name = track.value
@@ -63,35 +93,57 @@ def freeze_leaderboard_and_create_rewards(
                 continue
 
             rank = snap.rank
-            reward_type = None
-            amount = None
-            description = None
+            cfg = _get_config(configs, track_name, rank)
 
-            if rank <= 3:
-                tier_name = "top_3"
+            if cfg:
+                reward_type = cfg.reward_type
+                amount = cfg.amount_usd
+                description = cfg.reward_name
+                custom_name = cfg.reward_name
+                image_url = cfg.image_url
+                if rank <= 3:
+                    tier = "top_3"
+                elif rank <= 100:
+                    tier = "top_100"
+                else:
+                    tier = "top_1000"
+            elif rank <= 3:
+                tier = "top_3"
                 reward_type = RewardType.giftcard
                 amount = rank_amounts.get(rank, 50)
-                description = f"Rank {rank} — ${amount:.0f} Gift Card"
+                description = f"Rank {rank} \u2014 ${amount:.0f} Gift Card"
+                custom_name = None
+                image_url = None
             else:
-                for tier_name, cfg in BADGE_TIERS.items():
-                    if rank <= cfg["rank_max"]:
-                        reward_type = cfg["type"]
-                        amount = cfg["amount_usd"]
-                        description = cfg["description"]
+                tier = None
+                reward_type = None
+                amount = None
+                description = None
+                custom_name = None
+                image_url = None
+                for tn, cfg_tier in BADGE_TIERS.items():
+                    if rank <= cfg_tier["rank_max"]:
+                        tier = tn
+                        reward_type = cfg_tier["type"]
+                        amount = cfg_tier["amount_usd"]
+                        description = cfg_tier["description"]
                         break
 
-            if not reward_type:
+            if not tier or not reward_type:
                 continue
 
+            reward_type_val = reward_type if isinstance(reward_type, str) else reward_type.value
             reward = Reward(
                 user_id=snap.user_id,
                 track=track_name,
                 period_month=period_month,
-                tier=tier_name,
+                tier=tier,
                 rank_at_freeze=rank,
-                reward_type=reward_type,
+                reward_type=reward_type_val,
                 reward_amount_usd=amount,
                 reward_description=description,
+                custom_reward_name=custom_name,
+                reward_image_url=image_url,
                 status=RewardStatus.pending,
             )
             db.add(reward)
@@ -176,6 +228,8 @@ def enrich_reward(reward: Reward, user: Optional[User]) -> dict:
         "reward_type": reward.reward_type,
         "reward_amount_usd": reward.reward_amount_usd,
         "reward_description": reward.reward_description,
+        "custom_reward_name": reward.custom_reward_name,
+        "reward_image_url": reward.reward_image_url,
         "status": reward.status.value if hasattr(reward.status, 'value') else reward.status,
         "kyc_verified": reward.kyc_verified,
         "kyc_verification_id": reward.kyc_verification_id,

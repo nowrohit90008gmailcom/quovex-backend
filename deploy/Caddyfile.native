@@ -1,4 +1,16 @@
+# Automatic HTTPS redirect
+http://*.quovex.online {
+    redir https://{host}{uri} 301
+}
+
 api.quovex.online {
+    encode gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
     reverse_proxy 127.0.0.1:8000
 
     handle_path /downloads/* {
@@ -8,5 +20,12 @@ api.quovex.online {
 }
 
 admin.quovex.online {
+    encode gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https://api.quovex.online"
+    }
     reverse_proxy 127.0.0.1:3000
 }

@@ -11,7 +11,7 @@ interface PushForm {
 
 const PRESETS = [
   { label: 'Daily Reminder', title: 'Time to study!', body: 'Even 30 minutes a day keeps your streak alive. Open the app and start a session.' },
-  { label: 'Streak Risk', title: 'Streak at risk!', body: 'You haven\'t studied today! Your streak is on the line — open StudyTimer now.' },
+  { label: 'Streak Risk', title: 'Streak at risk!', body: 'You haven\'t studied today! Your streak is on the line — open Quovex now.' },
   { label: 'Rewards', title: 'Rewards are here!', body: 'Top performers for this month have been selected. Check your rewards in the app!' },
   { label: 'Quiz', title: 'New questions added!', body: 'Fresh quiz questions for JEE, NEET, and UPSC are ready. Test your knowledge now.' },
 ];
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
                   <p className="text-[#9aa0a6] text-[11px] leading-tight mt-0.5 line-clamp-3">{form.body || 'Your notification message will appear here.'}</p>
                 </div>
               </div>
-              <div className="text-[#757684] text-[10px] text-center">StudyTimer · now</div>
+              <div className="text-[#757684] text-[10px] text-center">Quovex · now</div>
             </div>
 
             {/* Targeting Summary */}

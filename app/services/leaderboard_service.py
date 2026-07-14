@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 
 from app.models import (
-    User, Session as StudySession, LeaderboardSnapshot,
+    User, Session as StudySession, QuizSession, LeaderboardSnapshot,
     LeaderboardTrack, LeaderboardScope, LeaderboardPeriod
 )
 
@@ -78,9 +78,6 @@ def compute_leaderboard(
             )
         )
     elif track == LeaderboardTrack.quiz:
-        # BUG FIX: rank_col was set to func.sum(StudySession.verified_minutes) which was
-        # dead code — the actual score column is User.verified_quiz_score selected directly.
-        # No StudySession join is needed for quiz track (cumulative score is on the User model).
         query = (
             db.query(
                 User.id.label("user_id"),
@@ -90,11 +87,41 @@ def compute_leaderboard(
                 User.state,
                 User.streak_count,
                 User.exam_tags,
-                User.verified_quiz_score.label("score"),
+                func.coalesce(func.sum(QuizSession.verified_quiz_score_earned), 0).label("score"),
+            )
+            .outerjoin(
+                QuizSession,
+                (QuizSession.user_id == User.id)
+                & (QuizSession.start_time >= since)
+                & (QuizSession.is_complete == True)
             )
         )
     else:
-        # Overall: verified_minutes * 1 + verified_quiz_score * 0.5
+        study_score = (
+            db.query(
+                StudySession.user_id,
+                func.coalesce(func.sum(StudySession.verified_minutes), 0).label("study_score"),
+            )
+            .filter(
+                StudySession.start_time >= since,
+                StudySession.is_active == False,
+                StudySession.flagged == False,
+            )
+            .group_by(StudySession.user_id)
+            .subquery()
+        )
+        quiz_score = (
+            db.query(
+                QuizSession.user_id,
+                func.coalesce(func.sum(QuizSession.verified_quiz_score_earned), 0).label("quiz_score"),
+            )
+            .filter(
+                QuizSession.start_time >= since,
+                QuizSession.is_complete == True,
+            )
+            .group_by(QuizSession.user_id)
+            .subquery()
+        )
         query = (
             db.query(
                 User.id.label("user_id"),
@@ -104,8 +131,13 @@ def compute_leaderboard(
                 User.state,
                 User.streak_count,
                 User.exam_tags,
-                (User.verified_minutes_total + User.verified_quiz_score * 0.5).label("score"),
+                (
+                    func.coalesce(study_score.c.study_score, 0)
+                    + func.coalesce(quiz_score.c.quiz_score, 0) * 0.5
+                ).label("score"),
             )
+            .outerjoin(study_score, study_score.c.user_id == User.id)
+            .outerjoin(quiz_score, quiz_score.c.user_id == User.id)
         )
 
     # Apply scope filters
@@ -118,8 +150,8 @@ def compute_leaderboard(
     if exam_tag:
         query = query.filter(User.exam_tags.contains([exam_tag]))
 
-    # For study track, group by user
-    if track == LeaderboardTrack.study:
+    # Group by user for aggregate-based tracks
+    if track != LeaderboardTrack.overall:
         query = query.group_by(
             User.id, User.display_name, User.avatar_url,
             User.country, User.state, User.streak_count, User.exam_tags

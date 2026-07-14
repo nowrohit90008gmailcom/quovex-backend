@@ -1,11 +1,11 @@
 'use client';
-import { useState, FormEvent, useRef } from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -15,8 +15,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const email = emailRef.current?.value || '';
-    const password = passwordRef.current?.value || '';
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/auth/admin-login`, {
         method: 'POST',
@@ -27,12 +25,6 @@ export default function LoginPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.detail || 'Invalid credentials');
       }
-      const data = await res.json();
-      localStorage.setItem('admin_token', data.access_token);
-      localStorage.setItem('admin_user', JSON.stringify(data.user || {}));
-      // BUG FIX: remember checkbox state was tracked but never applied to cookie max-age
-      const maxAge = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24; // 30 days vs 1 day
-      document.cookie = `admin_token=${data.access_token}; path=/; max-age=${maxAge}; SameSite=Strict`;
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -76,10 +68,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md flex flex-col items-center gap-6">
           {/* Brand */}
           <div className="flex flex-col items-center gap-2 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#00288e] flex items-center justify-center shadow-lg shadow-[#00288e]/20 mb-2">
-              <span className="material-symbols-outlined text-[32px] text-white">timer</span>
-            </div>
-            <h1 className="text-[30px] leading-[38px] tracking-[-0.02em] font-bold text-[#00288e]">StudyTimer</h1>
+            <img src="/logo.png" alt="Quovex" className="w-16 h-16 mb-2" />
+            <h1 className="text-[30px] leading-[38px] tracking-[-0.02em] font-bold text-[#00288e]">Quovex</h1>
             <p className="text-[18px] leading-[28px] text-[#444653]">Admin Console</p>
           </div>
 
@@ -107,12 +97,12 @@ export default function LoginPage() {
                 <div className="relative flex items-center">
                   <span className="material-symbols-outlined absolute left-3 text-[#444653] text-[20px]">mail</span>
                   <input
-                    ref={emailRef}
                     id="email"
                     type="email"
-                    defaultValue=""
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
-                    placeholder="admin@studytimer.com"
+                    placeholder="supportquovex@gmail.com"
                     required
                     className="w-full pl-10 pr-4 py-2.5 bg-[#f9f9ff] rounded-lg border border-[#c4c5d5] focus:border-[#00288e] focus:ring-2 focus:ring-[#00288e]/20 transition-all text-[14px] text-[#141b2b] outline-none"
                   />
@@ -127,10 +117,10 @@ export default function LoginPage() {
                 <div className="relative flex items-center">
                   <span className="material-symbols-outlined absolute left-3 text-[#444653] text-[20px]">lock</span>
                   <input
-                    ref={passwordRef}
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    defaultValue=""
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
                     placeholder="••••••••"
                     required
@@ -178,7 +168,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <footer className="w-full py-6 flex flex-col sm:flex-row items-center justify-center sm:justify-between px-4 md:px-8 border-t border-[#c4c5d5]/30 text-[#444653] z-10 bg-[#f9f9ff]/80 backdrop-blur-sm">
-        <p className="text-[12px] leading-[16px] tracking-[0.05em] font-medium mb-4 sm:mb-0">© 2024 StudyTimer Inc. All rights reserved.</p>
+        <p className="text-[12px] leading-[16px] tracking-[0.05em] font-medium mb-4 sm:mb-0">© 2024 Quovex Inc. All rights reserved.</p>
         <div className="flex gap-4 text-[12px] leading-[16px] tracking-[0.05em] font-medium">
           <a className="hover:text-[#00288e] transition-colors" href="/privacy">Privacy Policy</a>
           <a className="hover:text-[#00288e] transition-colors" href="/terms">Terms of Service</a>

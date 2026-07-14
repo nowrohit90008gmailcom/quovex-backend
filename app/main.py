@@ -4,7 +4,7 @@ import os
 import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from sqlalchemy import text
 
 from app.config import settings
@@ -33,7 +33,7 @@ from app.db.redis_client import close_redis, get_redis
 from app.models import *  # noqa: ensure models are registered
 
 # Import routers
-from app.api.v1 import auth, sessions, leaderboard, quiz, users, admin, rewards, badges, app_lock, referral, topics, reports, app_version, support
+from app.api.v1 import auth, sessions, leaderboard, quiz, users, admin, rewards, badges, app_lock, referral, topics, reports, app_version, support, reward_configs, subjects
 
 # Rate limiting
 from slowapi import _rate_limit_exceeded_handler
@@ -81,11 +81,44 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
 )
 
-# Serve uploaded files (KYC photos, etc.)
+
+# Security headers
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response: Response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    if settings.ENVIRONMENT == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "font-src 'self'; "
+        "connect-src 'self'"
+    )
+    return response
+
+
+# Request body size limit (10 MB)
+MAX_BODY_SIZE = 10 * 1024 * 1024
+
+
+@app.middleware("http")
+async def limit_body_size(request: Request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_BODY_SIZE:
+        return JSONResponse(status_code=413, content={"detail": "Request body too large"})
+    return await call_next(request)
+
+
+# Serve uploaded files (KYC photos, etc.) — requires auth
 UPLOAD_DIR = settings.UPLOAD_DIR
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
@@ -106,6 +139,10 @@ app.include_router(topics.router, prefix=API_PREFIX)
 app.include_router(reports.router, prefix=API_PREFIX)
 app.include_router(app_version.router, prefix=API_PREFIX)
 app.include_router(support.router, prefix=API_PREFIX)
+app.include_router(reward_configs.router, prefix=API_PREFIX)
+app.include_router(reward_configs.public_router, prefix=API_PREFIX)
+app.include_router(subjects.router, prefix=API_PREFIX)
+app.include_router(subjects.public_router, prefix=API_PREFIX)
 
 
 @app.get("/health")

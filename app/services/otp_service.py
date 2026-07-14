@@ -1,4 +1,4 @@
-"""OTP generation and verification (in-memory with TTL + DB audit logging)."""
+"""OTP generation and verification (Redis-backed with TTL + DB audit logging)."""
 import hashlib
 import random
 import time
@@ -7,12 +7,19 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session as DBSession
 
+from app.config import settings
 from app.models import OTPLog
-
-_otp_store: dict[str, dict] = {}
 
 OTP_LENGTH = 6
 OTP_TTL_SECONDS = 600
+
+
+def _get_redis():
+    try:
+        import redis as _redis
+        return _redis.from_url(settings.REDIS_URL, decode_responses=True)
+    except Exception:
+        return None
 
 
 def _hash_otp(otp: str) -> str:
@@ -21,10 +28,11 @@ def _hash_otp(otp: str) -> str:
 
 def generate_otp(email: str, db: Optional[DBSession] = None, ip_address: Optional[str] = None) -> str:
     otp = ''.join(str(random.randint(0, 9)) for _ in range(OTP_LENGTH))
-    _otp_store[email] = {
-        "otp": otp,
-        "expires_at": time.time() + OTP_TTL_SECONDS,
-    }
+    r = _get_redis()
+    if r is not None:
+        r.setex(f"otp:{email}", OTP_TTL_SECONDS, otp)
+    else:
+        raise RuntimeError("Redis unavailable — cannot generate OTP")
     if db is not None:
         log = OTPLog(
             email=email,
@@ -37,12 +45,14 @@ def generate_otp(email: str, db: Optional[DBSession] = None, ip_address: Optiona
 
 
 def verify_otp(email: str, otp: str, db: Optional[DBSession] = None) -> bool:
-    entry = _otp_store.pop(email, None)
-    if entry is None:
+    r = _get_redis()
+    if r is None:
         return False
-    if time.time() > entry["expires_at"]:
+    stored = r.get(f"otp:{email}")
+    if stored is None:
         return False
-    is_valid = entry["otp"] == otp
+    r.delete(f"otp:{email}")
+    is_valid = stored == otp
     if db is not None and is_valid:
         log = db.query(OTPLog).filter(
             OTPLog.email == email,
@@ -53,10 +63,3 @@ def verify_otp(email: str, otp: str, db: Optional[DBSession] = None) -> bool:
             log.verified_at = datetime.now(timezone.utc)
             db.commit()
     return is_valid
-
-
-def cleanup_expired():
-    now = time.time()
-    expired = [k for k, v in _otp_store.items() if v["expires_at"] < now]
-    for k in expired:
-        del _otp_store[k]
