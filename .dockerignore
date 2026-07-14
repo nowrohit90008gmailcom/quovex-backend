@@ -1,8 +1,0 @@
-# Prevent secrets and git metadata being copied into image
-.env
-firebase-credentials.json
-.git
-__pycache__
-*.pyc
-venv
-.venv
