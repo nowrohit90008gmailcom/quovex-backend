@@ -25,6 +25,11 @@ export default function LoginPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.detail || 'Invalid credentials');
       }
+      const data = await res.json();
+      const maxAge = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
+      document.cookie = `admin_token=${data.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+      localStorage.setItem('admin_token', data.access_token);
+      localStorage.setItem('admin_user', JSON.stringify(data.user || {}));
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed');
