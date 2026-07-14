@@ -74,7 +74,7 @@ async def admin_login(body: AdminLoginIn, request: Request, db: Session = Depend
         content=AdminLoginOut(
             access_token=token,
             user=UserProfileOut.model_validate(user),
-        ).model_dump(),
+        ).model_dump(mode='json'),
     )
     response.set_cookie(
         key="admin_token",
