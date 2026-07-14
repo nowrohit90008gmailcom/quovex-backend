@@ -7,9 +7,6 @@ Create Date: 2026-07-13 23:30:00.000000
 from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
-
-
 revision: str = 'b2c3d4e5f6a7'
 down_revision: Union[str, None] = 'a1b2c3d4e5f6'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -34,8 +31,7 @@ def upgrade() -> None:
     )
     op.add_column('rewards', sa.Column('custom_reward_name', sa.String(length=200), nullable=True))
     op.add_column('rewards', sa.Column('reward_image_url', sa.Text(), nullable=True))
-    # Add physical_item to reward_type enum
-    op.execute("ALTER TYPE rewardtype ADD VALUE 'physical_item'")
+
 
 
 def downgrade() -> None:
