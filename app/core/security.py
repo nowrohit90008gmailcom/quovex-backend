@@ -62,6 +62,15 @@ def verify_firebase_token(token: str) -> dict:
 def get_or_create_user(db: Session, firebase_uid: str, email: Optional[str], display_name: Optional[str], referral_code: Optional[str] = None) -> User:
     """Get or create a user record from a Firebase identity."""
     user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
+    if not user and email:
+        from sqlalchemy import func
+        user = db.query(User).filter(func.lower(User.email) == func.lower(email)).first()
+        if user:
+            if not user.firebase_uid or user.firebase_uid.startswith("email:"):
+                user.firebase_uid = firebase_uid
+                db.commit()
+                db.refresh(user)
+
     if not user:
         user = User(firebase_uid=firebase_uid, email=email, display_name=display_name)
         if referral_code:
