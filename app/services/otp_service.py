@@ -47,18 +47,14 @@ def generate_otp(email: str, db: Optional[DBSession] = None, ip_address: Optiona
 
 
 def verify_otp(email: str, otp: str, db: Optional[DBSession] = None) -> bool:
-    r = _get_redis()
-    if r is None:
-        return False
     email_clean = email.lower().strip()
     otp_clean = otp.strip()
-    stored = r.get(f"otp:{email_clean}")
-    if stored is None:
-        return False
-    
-    is_valid = (stored == otp_clean)
-    if is_valid:
-        r.delete(f"otp:{email_clean}")
+
+    r = _get_redis()
+    stored = r.get(f"otp:{email_clean}") if r is not None else None
+    if stored and stored == otp_clean:
+        if r is not None:
+            r.delete(f"otp:{email_clean}")
         if db is not None:
             log = db.query(OTPLog).filter(
                 func.lower(OTPLog.email) == email_clean,
@@ -68,4 +64,25 @@ def verify_otp(email: str, otp: str, db: Optional[DBSession] = None) -> bool:
                 log.verified = True
                 log.verified_at = datetime.now(timezone.utc)
                 db.commit()
-    return is_valid
+        return True
+
+    # DB Fallback — check if OTP matches recent unverified audit log
+    if db is not None:
+        from datetime import timedelta
+        target_hash = _hash_otp(otp_clean)
+        cutoff = datetime.now(timezone.utc) - timedelta(seconds=OTP_TTL_SECONDS)
+        log = db.query(OTPLog).filter(
+            func.lower(OTPLog.email) == email_clean,
+            OTPLog.otp_hash == target_hash,
+            OTPLog.verified == False,
+            OTPLog.created_at >= cutoff,
+        ).order_by(OTPLog.created_at.desc()).first()
+        if log:
+            log.verified = True
+            log.verified_at = datetime.now(timezone.utc)
+            db.commit()
+            if r is not None:
+                r.delete(f"otp:{email_clean}")
+            return True
+
+    return False
