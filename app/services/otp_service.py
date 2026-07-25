@@ -40,6 +40,7 @@ def generate_otp(email: str, db: Optional[DBSession] = None, ip_address: Optiona
             email=email_clean,
             otp_hash=_hash_otp(otp),
             ip_address=ip_address,
+            created_at=datetime.now(timezone.utc),
         )
         db.add(log)
         db.commit()
