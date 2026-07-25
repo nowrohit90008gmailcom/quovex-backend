@@ -5,6 +5,7 @@ import time
 from typing import Optional
 from datetime import datetime, timezone
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session as DBSession
 
 from app.config import settings
@@ -27,15 +28,16 @@ def _hash_otp(otp: str) -> str:
 
 
 def generate_otp(email: str, db: Optional[DBSession] = None, ip_address: Optional[str] = None) -> str:
+    email_clean = email.lower().strip()
     otp = ''.join(str(random.randint(0, 9)) for _ in range(OTP_LENGTH))
     r = _get_redis()
     if r is not None:
-        r.setex(f"otp:{email}", OTP_TTL_SECONDS, otp)
+        r.setex(f"otp:{email_clean}", OTP_TTL_SECONDS, otp)
     else:
         raise RuntimeError("Redis unavailable — cannot generate OTP")
     if db is not None:
         log = OTPLog(
-            email=email,
+            email=email_clean,
             otp_hash=_hash_otp(otp),
             ip_address=ip_address,
         )
@@ -48,18 +50,22 @@ def verify_otp(email: str, otp: str, db: Optional[DBSession] = None) -> bool:
     r = _get_redis()
     if r is None:
         return False
-    stored = r.get(f"otp:{email}")
+    email_clean = email.lower().strip()
+    otp_clean = otp.strip()
+    stored = r.get(f"otp:{email_clean}")
     if stored is None:
         return False
-    r.delete(f"otp:{email}")
-    is_valid = stored == otp
-    if db is not None and is_valid:
-        log = db.query(OTPLog).filter(
-            OTPLog.email == email,
-            OTPLog.verified == False,
-        ).order_by(OTPLog.created_at.desc()).first()
-        if log:
-            log.verified = True
-            log.verified_at = datetime.now(timezone.utc)
-            db.commit()
+    
+    is_valid = (stored == otp_clean)
+    if is_valid:
+        r.delete(f"otp:{email_clean}")
+        if db is not None:
+            log = db.query(OTPLog).filter(
+                func.lower(OTPLog.email) == email_clean,
+                OTPLog.verified == False,
+            ).order_by(OTPLog.created_at.desc()).first()
+            if log:
+                log.verified = True
+                log.verified_at = datetime.now(timezone.utc)
+                db.commit()
     return is_valid
