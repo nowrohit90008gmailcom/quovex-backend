@@ -41,8 +41,9 @@ def _validate_and_clean_exam_tags(user: User, db: DBSession):
     """Nullify exam_tags if they don't match user's country + education level."""
     if not user.exam_tags or not user.country:
         return
+    inst_type = getattr(user.institution_type, 'value', user.institution_type) if user.institution_type else None
     level = get_education_level(
-        user.institution_type.value if user.institution_type else None,
+        inst_type,
         user.class_or_year,
     )
     valid = get_filtered_tags(country=user.country, education_level=level)
