@@ -74,6 +74,12 @@ async def update_my_profile(
     update_data = body.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         if hasattr(current_user, field):
+            if field == "institution_type" and isinstance(value, str) and value:
+                try:
+                    from app.models import InstitutionType
+                    value = InstitutionType(value)
+                except ValueError:
+                    pass
             setattr(current_user, field, value)
     _validate_and_clean_exam_tags(current_user, db)
     db.commit()

@@ -90,6 +90,7 @@ class UserUpdateIn(BaseModel):
     daily_study_target_minutes: Optional[int] = None
     language: Optional[str] = None
     notification_prefs: Optional[dict] = None
+    profile_complete: Optional[bool] = None
 
 
 class UserPublicOut(BaseModel):
