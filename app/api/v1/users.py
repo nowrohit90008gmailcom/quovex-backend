@@ -51,7 +51,6 @@ def _validate_and_clean_exam_tags(user: User, db: DBSession):
     clean = [t for t in user.exam_tags if t in valid_labels]
     if len(clean) != len(user.exam_tags):
         user.exam_tags = clean if clean else None
-        db.commit()
 
 
 @router.get("/me", response_model=UserProfileOut)
