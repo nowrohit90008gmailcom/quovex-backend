@@ -38,16 +38,20 @@ def next_class(current: str, inst_type: str) -> tuple[str, bool]:
 
 EXAM_TAGS_BY_COUNTRY = {
     "India": [
-        {"tag": "JEE Main", "category": "competitive", "country": "India"},
-        {"tag": "JEE Advanced", "category": "competitive", "country": "India"},
-        {"tag": "NEET", "category": "competitive", "country": "India"},
-        {"tag": "UPSC CSE", "category": "competitive", "country": "India"},
-        {"tag": "GATE", "category": "competitive", "country": "India"},
+        {"tag": "CBSE (Class 6-8)", "category": "school_board", "country": "India"},
+        {"tag": "ICSE (Class 6-8)", "category": "school_board", "country": "India"},
+        {"tag": "State Board (Class 6-8)", "category": "school_board", "country": "India"},
+        {"tag": "Olympiads / Foundation", "category": "competitive", "country": "India"},
         {"tag": "CBSE Class 10", "category": "school_board", "country": "India"},
         {"tag": "CBSE Class 12", "category": "school_board", "country": "India"},
         {"tag": "ICSE Class 10", "category": "school_board", "country": "India"},
         {"tag": "ICSE Class 12", "category": "school_board", "country": "India"},
         {"tag": "State Board", "category": "school_board", "country": "India"},
+        {"tag": "JEE Main", "category": "competitive", "country": "India"},
+        {"tag": "JEE Advanced", "category": "competitive", "country": "India"},
+        {"tag": "NEET", "category": "competitive", "country": "India"},
+        {"tag": "UPSC CSE", "category": "competitive", "country": "India"},
+        {"tag": "GATE", "category": "competitive", "country": "India"},
         {"tag": "CAT", "category": "competitive", "country": "India"},
         {"tag": "CLAT", "category": "competitive", "country": "India"},
         {"tag": "NDA", "category": "competitive", "country": "India"},
@@ -223,12 +227,12 @@ def get_filtered_tags(
 
     if education_level:
         if education_level == "school_1_to_10":
-            tags = [t for t in tags if t["category"] == "school_board"]
+            tags = [t for t in tags if t["category"] in ("school_board", "competitive")]
         elif education_level == "school_11_to_12":
             tags = [t for t in tags if t["category"] in ("school_board", "competitive")]
         elif education_level == "college_1st_2nd":
-            tags = []
+            tags = [t for t in tags if t["category"] == "competitive"] or tags
         elif education_level in ("college_3rd_plus", "competitive"):
-            tags = [t for t in tags if t["category"] == "competitive"]
+            tags = [t for t in tags if t["category"] == "competitive"] or tags
 
-    return tags
+    return tags if tags else EXAM_TAGS_BY_COUNTRY.get("India", [])
