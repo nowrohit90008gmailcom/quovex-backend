@@ -19,9 +19,13 @@ def create_access_token(subject: str, extra_claims: dict | None = None, *, token
     Create a signed JWT for a user.
     `subject` is the user's UUID (str).
     `token_type` can be "admin_dashboard" or "email_auth".
+    Mobile tokens (email_auth) expire in 365 days; admin dashboard tokens expire in 8 hours.
     """
     now = datetime.now(timezone.utc)
-    expire = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    if token_type == "email_auth":
+        expire = now + timedelta(days=365)
+    else:
+        expire = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": subject,
         "iat": now,
