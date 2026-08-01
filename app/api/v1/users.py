@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException, Body
 from sqlalchemy.orm import Session as DBSession
 
 from app.core.security import get_current_user
-from app.core.constants import get_filtered_tags, get_education_level
+from app.core.constants import get_filtered_tags, get_education_level, profile_is_complete
 from app.db.session import get_db
 from app.models import User, UserSubjectProficiency, UserTopicProgress, Topic, AppUsageLog, Session as StudySession
 from app.schemas import UserProfileOut, UserPublicOut, UserUpdateIn, SubjectBreakdownOut, MonthlyAccuracyOut, TopicBreakdownOut
@@ -61,6 +61,8 @@ async def get_my_profile(
     """Get the authenticated user's full profile. Runs class auto-advance if applicable."""
     _auto_advance_class_if_april(current_user, db)
     _validate_and_clean_exam_tags(current_user, db)
+    current_user.profile_complete = profile_is_complete(current_user)
+    db.commit()
     return UserProfileOut.model_validate(current_user)
 
 
@@ -82,6 +84,7 @@ async def update_my_profile(
                     pass
             setattr(current_user, field, value)
     _validate_and_clean_exam_tags(current_user, db)
+    current_user.profile_complete = profile_is_complete(current_user)
     db.commit()
     db.refresh(current_user)
     return UserProfileOut.model_validate(current_user)

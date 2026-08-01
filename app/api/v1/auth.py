@@ -12,7 +12,7 @@ from fastapi import Request
 
 from app.core.security import get_current_user, get_current_admin, verify_firebase_token, get_or_create_user
 from app.core.jwt import create_access_token
-from app.core.constants import SUPPORTED_COUNTRIES, get_filtered_tags
+from app.core.constants import SUPPORTED_COUNTRIES, get_filtered_tags, profile_is_complete
 from app.db.session import get_db
 from app.models import User, AdminRole
 from app.schemas import AuthTokenIn, AuthFirebaseIn, AuthOut, UserProfileOut, UserUpdateIn
@@ -180,6 +180,8 @@ async def verify_otp_endpoint(body: VerifyOtpIn, request: Request, db: Session =
 
     token = create_access_token(str(user.id), token_type="email_auth")
 
+    user.profile_complete = profile_is_complete(user)
+    db.commit()
     return VerifyOtpOut(
         access_token=token,
         user=UserProfileOut.model_validate(user),
@@ -237,6 +239,8 @@ async def login(body: AuthTokenIn, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
+    user.profile_complete = profile_is_complete(user)
+    db.commit()
     return AuthOut(user=UserProfileOut.model_validate(user))
 
 
@@ -275,8 +279,10 @@ async def firebase_login(
 # ─── Profile ─────────────────────────────────────────────────────────────────
 
 @router.get("/me", response_model=UserProfileOut)
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Get the currently authenticated user's profile."""
+    current_user.profile_complete = profile_is_complete(current_user)
+    db.commit()
     return UserProfileOut.model_validate(current_user)
 
 
@@ -290,6 +296,7 @@ async def update_me(
     update_data = body.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(current_user, field, value)
+    current_user.profile_complete = profile_is_complete(current_user)
     db.commit()
     db.refresh(current_user)
     return UserProfileOut.model_validate(current_user)

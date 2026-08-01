@@ -191,6 +191,22 @@ SUBJECTS = {
 
 # ─── Filtering logic ──────────────────────────────────────────────────────────
 
+def profile_is_complete(user) -> bool:
+    """Return True when the user has filled the required onboarding profile fields.
+
+    Used to self-heal `profile_complete` on read/write so returning users never
+    re-see Profile Setup, even if the field was never explicitly persisted.
+    """
+    inst = getattr(user.institution_type, "value", None) or user.institution_type
+    return bool(
+        (user.full_name or "").strip()
+        and user.age is not None
+        and (user.country or "").strip()
+        and (user.class_or_year or "").strip()
+        and (inst or "").strip()
+    )
+
+
 def get_education_level(institution_type: Optional[str], class_or_year: Optional[str]) -> str:
     """Determine education level for exam tag filtering."""
     if not institution_type:
@@ -227,7 +243,12 @@ def get_filtered_tags(
 
     if education_level:
         if education_level == "school_1_to_10":
-            tags = [t for t in tags if t["category"] in ("school_board", "competitive")]
+            # Young students: only board exams + olympiads/foundation. No JEE/NEET/etc.
+            tags = [
+                t for t in tags
+                if t["category"] == "school_board"
+                or t["tag"] in ("Olympiads / Foundation",)
+            ] or tags
         elif education_level == "school_11_to_12":
             tags = [t for t in tags if t["category"] in ("school_board", "competitive")]
         elif education_level == "college_1st_2nd":
