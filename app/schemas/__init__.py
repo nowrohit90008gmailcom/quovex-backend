@@ -57,6 +57,12 @@ class UserProfileOut(BaseModel):
     institution_type: Optional[str] = None
     institution_name: Optional[str] = None
     class_or_year: Optional[str] = None
+    education_type: Optional[str] = None
+    exam_target: Optional[str] = None
+    study_goal: Optional[str] = None
+    daily_target_hours: Optional[float] = None
+    blocked_apps: Optional[List[str]] = None
+    study_time_preference: Optional[str] = None
     profile_complete: bool = False
     referral_code: Optional[str] = None
     referred_by_id: Optional[UUID] = None
@@ -87,6 +93,12 @@ class UserUpdateIn(BaseModel):
     institution_type: Optional[str] = None
     institution_name: Optional[str] = None
     class_or_year: Optional[str] = None
+    education_type: Optional[str] = None
+    exam_target: Optional[str] = None
+    study_goal: Optional[str] = None
+    daily_target_hours: Optional[float] = None
+    blocked_apps: Optional[List[str]] = None
+    study_time_preference: Optional[str] = None
     daily_study_target_minutes: Optional[int] = None
     language: Optional[str] = None
     notification_prefs: Optional[dict] = None

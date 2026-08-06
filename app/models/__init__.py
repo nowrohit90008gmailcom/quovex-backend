@@ -161,6 +161,13 @@ class User(Base, TimestampMixin):
         Integer, nullable=True,
         comment="The year in which class_or_year was last auto-advanced (April 1 job)"
     )
+    education_type = Column(String(100), nullable=True)
+    exam_target = Column(String(100), nullable=True)
+    study_goal = Column(String(150), nullable=True)
+    daily_target_hours = Column(Float, default=4.0, nullable=True)
+    blocked_apps = Column(JSON, nullable=True, default=[])
+    study_time_preference = Column(String(100), nullable=True)
+
     profile_complete = Column(Boolean, default=False, nullable=False,
                               comment="True once user finishes the post-signup profile form")
     referral_code = Column(String(20), unique=True, nullable=True, index=True)

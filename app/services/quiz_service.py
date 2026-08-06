@@ -89,6 +89,10 @@ def select_questions(
         fallback = fallback.filter(QuizQuestion.subject == subject)
     if exam_tag:
         fallback = fallback.filter(QuizQuestion.exam_tag == exam_tag)
+    if grade_or_tag:
+        fallback = fallback.filter(
+            (QuizQuestion.grade_or_tag == grade_or_tag) | (QuizQuestion.exam_tag == grade_or_tag)
+        )
 
     fallback_questions = fallback.limit(count * 5).all()
     random.shuffle(fallback_questions)

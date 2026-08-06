@@ -17,6 +17,7 @@ from app.models import (
     User, Session as StudySession, QuizQuestion, QuizSession, Reward, AdminActionLog,
     AdRevenueLog, OTPLog, RewardStatus, RewardType, QuestionStatus, AdminRole,
     LeaderboardSnapshot, LeaderboardTrack, LeaderboardPeriod, LeaderboardScope, NotificationLog,
+    GradeSubject,
 )
 from app.schemas import (
     AdminUserListOut, AdminUserDetailOut, AdminUserUpdateIn,
@@ -313,6 +314,40 @@ async def update_question(
     db.commit()
     db.refresh(q)
     return QuizQuestionAdminOut.model_validate(q)
+
+
+@router.get("/quiz/coverage-report")
+async def question_coverage_report(
+    admin=Depends(get_current_admin),
+    db: DBSession = Depends(get_db),
+):
+    """Show question counts per exam_tag and grade_or_tag.
+    Highlights any tag/grade with zero live questions — a critical content gap."""
+    exam_counts = (
+        db.query(QuizQuestion.exam_tag, func.count(QuizQuestion.id))
+        .filter(QuizQuestion.status == QuestionStatus.live, QuizQuestion.exam_tag.isnot(None))
+        .group_by(QuizQuestion.exam_tag)
+        .all()
+    )
+
+    grade_counts = (
+        db.query(QuizQuestion.grade_or_tag, func.count(QuizQuestion.id))
+        .filter(QuizQuestion.status == QuestionStatus.live, QuizQuestion.grade_or_tag.isnot(None))
+        .group_by(QuizQuestion.grade_or_tag)
+        .all()
+    )
+
+    grade_map = {r[0]: r[1] for r in grade_counts}
+    all_grades = [row.grade_or_tag for row in db.query(GradeSubject.grade_or_tag).distinct().all()]
+
+    zero_gaps = [g for g in all_grades if grade_map.get(g, 0) == 0]
+
+    return {
+        "exam_tag_counts": [{"tag": r[0], "count": r[1]} for r in exam_counts],
+        "grade_counts": [{"grade": g, "count": grade_map.get(g, 0)} for g in all_grades],
+        "zero_coverage_grades": zero_gaps,
+        "total_live_questions": sum(r[1] for r in exam_counts) + sum(r[1] for r in grade_counts),
+    }
 
 
 @router.delete("/quiz/questions/{question_id}")

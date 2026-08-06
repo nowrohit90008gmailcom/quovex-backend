@@ -37,6 +37,8 @@ def _get_grade_subject_combos() -> list[tuple[str, str]]:
 
 GENERATION_PROMPT = """Generate {count} quiz questions for subject: {subject}, exam: {exam_tag}, difficulty: {difficulty}.
 
+Context: {context_note}
+
 Return ONLY a valid JSON array. Each object must have:
 - "text": question text
 - "options": array of 4 answer strings (for MCQ)
@@ -50,6 +52,16 @@ Rules:
 - No duplicate questions
 - Difficulty {difficulty}: {{easy = recall-based, medium = application, hard = analysis}}
 """
+
+
+def _grade_to_age(grade: str) -> str:
+    mapping = {
+        "Class 1": "6-7", "Class 2": "7-8", "Class 3": "8-9",
+        "Class 4": "9-10", "Class 5": "10-11", "Class 6": "11-12",
+        "Class 7": "12-13", "Class 8": "13-14", "Class 9": "14-15",
+        "Class 10": "15-16", "Class 11": "16-17", "Class 12": "17-18",
+    }
+    return mapping.get(grade, "school-age")
 
 
 def _pick_api_key() -> str:
@@ -131,8 +143,15 @@ def generate_quiz_questions(subject: str = None, exam_tag: str = None, grade_or_
 
 def _call_cerebras(api_key: str, subject: str, exam_tag: str, difficulty: str, count: int) -> List[dict]:
     """Call Cerebras API for question generation with key rotation on retry."""
+    is_school_grade = exam_tag.startswith("Class ")
+    context_note = (
+        f"These questions are for {exam_tag} school students (age ~{_grade_to_age(exam_tag)}). "
+        f"Keep language simple and age-appropriate."
+        if is_school_grade
+        else f"These questions are for {exam_tag} competitive exam preparation."
+    )
     prompt = GENERATION_PROMPT.format(
-        count=count, subject=subject, exam_tag=exam_tag, difficulty=difficulty
+        count=count, subject=subject, exam_tag=exam_tag, difficulty=difficulty, context_note=context_note
     )
 
     last_exc = None

@@ -191,20 +191,27 @@ SUBJECTS = {
 
 # ─── Filtering logic ──────────────────────────────────────────────────────────
 
-def profile_is_complete(user) -> bool:
-    """Return True when the user has filled the required onboarding profile fields.
+def get_first_missing_step(user) -> Optional[str]:
+    """Return the route key of the first missing onboarding profile step, or None if complete."""
+    inst = getattr(user, "education_type", None) or getattr(user.institution_type, "value", None) or user.institution_type
+    exam = getattr(user, "exam_target", None) or user.class_or_year or (user.exam_tags[0] if user.exam_tags else None)
 
-    Used to self-heal `profile_complete` on read/write so returning users never
-    re-see Profile Setup, even if the field was never explicitly persisted.
-    """
-    inst = getattr(user.institution_type, "value", None) or user.institution_type
-    return bool(
-        (user.full_name or "").strip()
-        and user.age is not None
-        and (user.country or "").strip()
-        and (user.class_or_year or "").strip()
-        and (inst or "").strip()
-    )
+    if not inst or not str(inst).strip():
+        return "onboarding/edu_type"
+    if not exam or not str(exam).strip():
+        return "onboarding/exam_class"
+    if not getattr(user, "study_goal", None) or not str(user.study_goal).strip():
+        return "onboarding/study_goal"
+    if not getattr(user, "daily_target_hours", None) or user.daily_target_hours <= 0:
+        return "onboarding/daily_target"
+    if not getattr(user, "blocked_apps", None):
+        return "onboarding/distraction_picker"
+    return None
+
+
+def profile_is_complete(user) -> bool:
+    """Return True when all required profile onboarding fields are present."""
+    return get_first_missing_step(user) is None
 
 
 def get_education_level(institution_type: Optional[str], class_or_year: Optional[str]) -> str:
