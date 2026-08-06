@@ -63,6 +63,9 @@ class UserProfileOut(BaseModel):
     daily_target_hours: Optional[float] = None
     blocked_apps: Optional[List[str]] = None
     study_time_preference: Optional[str] = None
+    reset_time_hour: Optional[int] = 8
+    lock_mode: Optional[str] = "STRICT"
+    wallet_minutes: Optional[int] = 120
     profile_complete: bool = False
     referral_code: Optional[str] = None
     referred_by_id: Optional[UUID] = None
@@ -99,6 +102,9 @@ class UserUpdateIn(BaseModel):
     daily_target_hours: Optional[float] = None
     blocked_apps: Optional[List[str]] = None
     study_time_preference: Optional[str] = None
+    reset_time_hour: Optional[int] = None
+    lock_mode: Optional[str] = None
+    wallet_minutes: Optional[int] = None
     daily_study_target_minutes: Optional[int] = None
     language: Optional[str] = None
     notification_prefs: Optional[dict] = None

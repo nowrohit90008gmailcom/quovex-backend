@@ -168,6 +168,11 @@ class User(Base, TimestampMixin):
     blocked_apps = Column(JSON, nullable=True, default=[])
     study_time_preference = Column(String(100), nullable=True)
 
+    # Quovex Freedom Lock fields
+    reset_time_hour = Column(Integer, default=8, nullable=True, comment="Daily reset time (default 8 for 8:00 AM)")
+    lock_mode = Column(String(50), default="STRICT", nullable=True, comment="STRICT | SMART | WEEKEND_RELAXED")
+    wallet_minutes = Column(Integer, default=120, nullable=True, comment="Study Wallet balance in minutes")
+
     profile_complete = Column(Boolean, default=False, nullable=False,
                               comment="True once user finishes the post-signup profile form")
     referral_code = Column(String(20), unique=True, nullable=True, index=True)
